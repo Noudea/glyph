@@ -12,7 +12,8 @@ import (
 type Mode int
 
 const (
-	ModeMain Mode = iota
+	ModeSplash Mode = iota
+	ModeMain
 	ModeLauncher
 )
 
@@ -35,6 +36,8 @@ type Model struct {
 
 	commandShortcuts map[string][]string
 	shortcutCommands map[string]string
+
+	splashFrame int
 
 	width  int
 	height int
@@ -68,7 +71,7 @@ func NewModel(state *core.State, workspace core.Workspace, resolver core.Workspa
 		root:          workspace.RootPath,
 		workspace:     workspace,
 		resolver:      resolver,
-		mode:          ModeLauncher,
+		mode:          ModeSplash,
 		registry:      registry,
 		modules:       moduleIndex,
 		launcherInput: li,
@@ -76,12 +79,15 @@ func NewModel(state *core.State, workspace core.Workspace, resolver core.Workspa
 	if err := model.loadGlobalShortcuts(); err != nil {
 		model.err = err.Error()
 	}
-	model.openLauncher()
 	return model
 }
 
 func (m *Model) Init() tea.Cmd {
-	return moduleInitCmd(m.modules, m.context())
+	cmds := []tea.Cmd{moduleInitCmd(m.modules, m.context())}
+	if m.mode == ModeSplash {
+		cmds = append(cmds, splashTickCmd())
+	}
+	return tea.Batch(cmds...)
 }
 
 func moduleInitCmd(modules map[string]core.Module, ctx core.CoreContext) tea.Cmd {

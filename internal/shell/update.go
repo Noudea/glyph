@@ -11,6 +11,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		return m, nil
+	case splashTickMsg:
+		return m.updateSplashTick()
 	case registry.ChangedMsg:
 		m.refreshRegistry()
 		return m, nil
@@ -29,6 +31,8 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	switch m.mode {
+	case ModeSplash:
+		return m.updateSplash(msg)
 	case ModeMain:
 		return m.updateMain(msg)
 	case ModeLauncher:
@@ -36,6 +40,25 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m *Model) updateSplash(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	// Any key skips the splash and opens the launcher.
+	_ = msg
+	m.finishSplash()
+	return m, nil
+}
+
+func (m *Model) updateSplashTick() (tea.Model, tea.Cmd) {
+	if m.mode != ModeSplash {
+		return m, nil
+	}
+	m.splashFrame++
+	if m.splashFrame >= splashFrameCount {
+		m.finishSplash()
+		return m, nil
+	}
+	return m, splashTickCmd()
 }
 
 func (m *Model) updateMain(msg tea.KeyMsg) (tea.Model, tea.Cmd) {

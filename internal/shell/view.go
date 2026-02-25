@@ -3,6 +3,7 @@ package shell
 import (
 	hintbarview "github.com/Noudea/glyph/internal/view/hintbar"
 	launcherview "github.com/Noudea/glyph/internal/view/launcher"
+	splashview "github.com/Noudea/glyph/internal/view/splash"
 	topbarview "github.com/Noudea/glyph/internal/view/topbar"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -12,13 +13,15 @@ const (
 )
 
 func (m *Model) View() string {
+	showHints := m.mode != ModeSplash
+
 	hints := hintbarview.Render(hintbarview.ViewState{
 		Width: m.width,
 		Text:  m.hintText(),
 	})
 
 	contentHeight := m.height
-	if m.height > 0 {
+	if showHints && m.height > 0 {
 		contentHeight = m.height - hintbarview.Height(m.width)
 		if contentHeight < 1 {
 			contentHeight = 1
@@ -27,7 +30,7 @@ func (m *Model) View() string {
 
 	content := m.renderContent(contentHeight)
 
-	if hints == "" {
+	if !showHints || hints == "" {
 		return content
 	}
 	return lipgloss.JoinVertical(lipgloss.Left, content, hints)
@@ -35,6 +38,12 @@ func (m *Model) View() string {
 
 func (m *Model) renderContent(contentHeight int) string {
 	switch m.mode {
+	case ModeSplash:
+		return splashview.Render(splashview.ViewState{
+			Frame:  m.splashFrame,
+			Width:  m.width,
+			Height: contentHeight,
+		})
 	case ModeMain:
 		return renderMain(m, contentHeight)
 	case ModeLauncher:
