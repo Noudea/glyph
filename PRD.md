@@ -249,6 +249,14 @@ The UI must feel:
 - Fast
 - Modern
 
+### 8.1 Color Palette (Current Direction)
+
+- Primary accent: `#FF9F68` (Glyph brand/action color)
+- Primary soft: `#FFD9A0` (active highlights)
+- Secondary border: `#5C6475` (structure/separators)
+- Secondary muted text: `#8A90A6` (supporting text)
+- Secondary surface: `#252A35` (chips/panels on dark UI)
+
 ---
 
 ## 9. Performance Requirements

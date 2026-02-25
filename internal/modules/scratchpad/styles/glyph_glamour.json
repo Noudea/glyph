@@ -1,0 +1,137 @@
+{
+  "document": {
+    "block_prefix": "\n",
+    "block_suffix": "\n",
+    "color": "#E8ECF6",
+    "margin": 0
+  },
+  "block_quote": {
+    "color": "#8A90A6",
+    "indent": 1,
+    "indent_token": "▌ "
+  },
+  "paragraph": {},
+  "list": {
+    "level_indent": 2
+  },
+  "heading": {
+    "block_suffix": "\n",
+    "color": "#FF9F68",
+    "bold": true
+  },
+  "h1": {
+    "prefix": " ",
+    "suffix": " ",
+    "color": "#2B1A0F",
+    "background_color": "#FFCF92",
+    "bold": true
+  },
+  "h2": {
+    "prefix": "## ",
+    "color": "#FF9F68",
+    "bold": true
+  },
+  "h3": {
+    "prefix": "### ",
+    "color": "#FFB988",
+    "bold": true
+  },
+  "h4": {
+    "prefix": "#### ",
+    "color": "#FFB988"
+  },
+  "h5": {
+    "prefix": "##### ",
+    "color": "#FFB988"
+  },
+  "h6": {
+    "prefix": "###### ",
+    "color": "#8A90A6"
+  },
+  "text": {},
+  "strikethrough": {
+    "crossed_out": true
+  },
+  "emph": {
+    "italic": true
+  },
+  "strong": {
+    "bold": true
+  },
+  "hr": {
+    "color": "#5C6475",
+    "format": "\n────────\n"
+  },
+  "item": {
+    "block_prefix": "✦ "
+  },
+  "enumeration": {
+    "block_prefix": ". "
+  },
+  "task": {
+    "ticked": "◆ ",
+    "unticked": "◇ "
+  },
+  "link": {
+    "color": "#FF9F68",
+    "underline": true
+  },
+  "link_text": {
+    "color": "#FFCF92",
+    "bold": true
+  },
+  "image": {
+    "color": "#FF9F68",
+    "underline": true
+  },
+  "image_text": {
+    "color": "#8A90A6",
+    "format": "Image: {{.text}} →"
+  },
+  "code": {
+    "prefix": " ",
+    "suffix": " ",
+    "color": "#FFD9A0",
+    "background_color": "#252A35"
+  },
+  "code_block": {
+    "margin": 0,
+    "chroma": {
+      "text": {
+        "color": "#E8ECF6"
+      },
+      "comment": {
+        "color": "#8A90A6"
+      },
+      "keyword": {
+        "color": "#FF9F68"
+      },
+      "keyword_type": {
+        "color": "#FFCF92"
+      },
+      "operator": {
+        "color": "#FFB988"
+      },
+      "name_function": {
+        "color": "#FFD9A0"
+      },
+      "literal_string": {
+        "color": "#FFCF92"
+      },
+      "literal_number": {
+        "color": "#FFB988"
+      },
+      "background": {
+        "background_color": "#252A35"
+      }
+    }
+  },
+  "table": {},
+  "definition_list": {},
+  "definition_term": {},
+  "definition_description": {
+    "block_prefix": "\n→ "
+  },
+  "html_block": {},
+  "html_span": {}
+}

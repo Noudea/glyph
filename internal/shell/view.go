@@ -7,6 +7,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+const (
+	mainContentPadX = 1
+)
+
 func (m *Model) View() string {
 	hints := hintbarview.Render(hintbarview.ViewState{
 		Width: m.width,
@@ -63,10 +67,28 @@ func renderMain(m *Model, contentHeight int) string {
 		if bodyHeight < 1 {
 			bodyHeight = 1
 		}
-		body = m.renderActiveModule(m.width, bodyHeight)
+		body = m.renderActiveModulePadded(m.width, bodyHeight)
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Left, top, body)
+}
+
+func (m *Model) renderActiveModulePadded(width, height int) string {
+	if width <= 0 || height <= 0 {
+		return m.renderActiveModule(width, height)
+	}
+
+	if width <= (mainContentPadX*2)+1 {
+		return m.renderActiveModule(width, height)
+	}
+
+	innerWidth := width - (mainContentPadX * 2)
+	content := m.renderActiveModule(innerWidth, height)
+	return lipgloss.NewStyle().
+		Width(width).
+		Height(height).
+		Padding(0, mainContentPadX).
+		Render(content)
 }
 
 func (m *Model) renderActiveModule(width, height int) string {

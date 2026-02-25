@@ -40,9 +40,15 @@ func renderMarkdown(content string, width int) string {
 	}
 
 	renderer, err := glamour.NewTermRenderer(
-		glamour.WithStandardStyle("dark"),
+		glamour.WithStylesFromJSONBytes(glyphGlamourStyle),
 		glamour.WithWordWrap(wrap),
 	)
+	if err != nil {
+		renderer, err = glamour.NewTermRenderer(
+			glamour.WithStandardStyle("dark"),
+			glamour.WithWordWrap(wrap),
+		)
+	}
 	if err != nil {
 		return content
 	}

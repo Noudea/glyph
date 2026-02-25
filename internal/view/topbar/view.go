@@ -16,107 +16,153 @@ type ViewState struct {
 	ActiveApp string
 }
 
+type topbarStyles struct {
+	line      lipgloss.Style
+	brand     lipgloss.Style
+	separator lipgloss.Style
+	tabActive lipgloss.Style
+	tabIdle   lipgloss.Style
+	overflow  lipgloss.Style
+	emptyTabs lipgloss.Style
+}
+
 func Render(state ViewState) string {
 	if state.Title == "" {
 		return ""
 	}
 
-	workspace := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#E2E2E2")).
-		Bold(true).
-		Render("⬡ " + state.Title)
+	const horizontalPadding = 1
+	styles := newTopbarStyles()
+	left := styles.brand.Render("✦ glyph · " + displayTitle(state.Title))
 
-	parts := buildTopBarParts(state.Width, workspace, state.Tabs, state.ActiveApp)
-	return renderTopBarLine(state.Width, parts)
+	const gap = "  "
+	if state.Width > 0 {
+		availableTabs := state.Width - (horizontalPadding * 2) - lipgloss.Width(left) - lipgloss.Width(gap)
+		if availableTabs < 1 {
+			line := renderLine(left, state.Width, styles.line, horizontalPadding)
+			spacer := renderLine("", state.Width, styles.line, horizontalPadding)
+			return spacer + "\n" + line + "\n" + spacer
+		}
+		tabs := renderTabsContent(availableTabs, state.Tabs, state.ActiveApp, styles)
+		content := lipgloss.JoinHorizontal(lipgloss.Left, left, styles.separator.Render(gap), tabs)
+		line := renderLine(content, state.Width, styles.line, horizontalPadding)
+		spacer := renderLine("", state.Width, styles.line, horizontalPadding)
+		return spacer + "\n" + line + "\n" + spacer
+	}
+
+	tabs := renderTabsContent(0, state.Tabs, state.ActiveApp, styles)
+	content := lipgloss.JoinHorizontal(lipgloss.Left, left, styles.separator.Render(gap), tabs)
+	return "\n" + styles.line.Render(" "+content+" ") + "\n"
 }
 
-func buildTopBarParts(width int, workspace string, tabs []core.Command, activeID string) []string {
-	active := lipgloss.NewStyle().Foreground(lipgloss.Color("#FFD166")).Bold(true)
-	inactive := lipgloss.NewStyle().Foreground(lipgloss.Color("#7A7A7A"))
+func newTopbarStyles() topbarStyles {
+	return topbarStyles{
+		line: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#E8ECF6")),
+		brand: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#2B1A0F")).
+			Background(lipgloss.Color("#FF9F68")).
+			Padding(0, 1),
+		separator: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#8A90A6")),
+		tabActive: lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#2B1A0F")).
+			Background(lipgloss.Color("#FFCF92")).
+			Padding(0, 1),
+		tabIdle: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#D8DFEE")).
+			Background(lipgloss.Color("#252A35")).
+			Padding(0, 1),
+		overflow: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#8A90A6")),
+		emptyTabs: lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#8A90A6")),
+	}
+}
 
-	parts := []string{workspace}
+func renderTabsContent(width int, tabs []core.Command, activeID string, styles topbarStyles) string {
 	if len(tabs) == 0 {
-		return parts
+		return styles.emptyTabs.Render("no open apps")
+	}
+
+	chips := make([]string, 0, len(tabs))
+	for _, tab := range tabs {
+		style := styles.tabIdle
+		if tab.ID == activeID {
+			style = styles.tabActive
+		}
+		chips = append(chips, style.Render(tab.Label))
 	}
 
 	if width <= 0 {
-		for _, tab := range tabs {
-			style := inactive
-			if tab.ID == activeID {
-				style = active
-			}
-			parts = append(parts, style.Render(tab.Label))
-		}
-		return parts
+		return strings.Join(chips, " ")
 	}
 
-	maxContent := width - 4
-	if maxContent < 1 {
-		return parts
-	}
-
-	sepWidth := lipgloss.Width(" │ ")
-	contentWidth := lipgloss.Width(workspace)
-	for i, tab := range tabs {
-		style := inactive
-		if tab.ID == activeID {
-			style = active
+	out := make([]string, 0, len(chips))
+	used := 0
+	for i, chip := range chips {
+		chipWidth := lipgloss.Width(chip)
+		sepWidth := 0
+		if len(out) > 0 {
+			sepWidth = 1
 		}
-		part := style.Render(tab.Label)
-		partWidth := lipgloss.Width(part)
 
-		remaining := len(tabs) - i - 1
+		remaining := len(chips) - i - 1
+		overflow := ""
 		overflowWidth := 0
 		if remaining > 0 {
-			overflowWidth = sepWidth + lipgloss.Width(renderOverflow(remaining))
+			overflow = styles.overflow.Render("+" + strconv.Itoa(remaining))
+			overflowWidth = 1 + lipgloss.Width(overflow)
 		}
-		needed := sepWidth + partWidth + overflowWidth
-		if contentWidth+needed > maxContent {
-			parts = append(parts, renderOverflow(remaining+1))
-			return parts
+
+		if used+sepWidth+chipWidth+overflowWidth > width {
+			if len(out) == 0 {
+				return ansi.Truncate(chip, width, "…")
+			}
+			out = append(out, overflow)
+			break
 		}
-		parts = append(parts, part)
-		contentWidth += sepWidth + partWidth
+
+		out = append(out, chip)
+		used += sepWidth + chipWidth
 	}
-	return parts
+
+	return strings.Join(out, " ")
 }
 
-func renderOverflow(count int) string {
-	style := lipgloss.NewStyle().Foreground(lipgloss.Color("#7A7A7A"))
-	return style.Render("›› " + strconv.Itoa(count) + " more")
+func displayTitle(title string) string {
+	title = strings.TrimSpace(title)
+	title = strings.TrimPrefix(title, "glyph · ")
+	if title == "" {
+		return "global"
+	}
+	return title
 }
 
-func renderTopBarLine(width int, parts []string) string {
-	if len(parts) == 0 {
-		return ""
-	}
-	sep := " │ "
-	content := strings.Join(parts, sep)
+func renderLine(content string, width int, style lipgloss.Style, horizontalPadding int) string {
 	if width <= 0 {
-		return content
+		return style.Render(strings.Repeat(" ", horizontalPadding) + content + strings.Repeat(" ", horizontalPadding))
 	}
-
-	if width < 4 {
-		return content
+	if horizontalPadding < 0 {
+		horizontalPadding = 0
 	}
-
-	maxContent := width - 4
-	if lipgloss.Width(content) > maxContent {
-		content = ansi.Truncate(content, maxContent, "…")
+	innerWidth := width - (horizontalPadding * 2)
+	if innerWidth < 1 {
+		innerWidth = 1
 	}
-	padding := maxContent - lipgloss.Width(content)
+	if lipgloss.Width(content) > innerWidth {
+		content = ansi.Truncate(content, innerWidth, "…")
+	}
+	padding := innerWidth - lipgloss.Width(content)
 	if padding < 0 {
 		padding = 0
 	}
-	line := "│ " + content + strings.Repeat(" ", padding) + " │"
-	top := "┌" + strings.Repeat("─", width-2) + "┐"
-	bot := "└" + strings.Repeat("─", width-2) + "┘"
-	return strings.Join([]string{top, line, bot}, "\n")
+	line := strings.Repeat(" ", horizontalPadding) + content + strings.Repeat(" ", padding) + strings.Repeat(" ", horizontalPadding)
+	return style.Render(line)
 }
 
 func Height(width int) int {
-	if width <= 0 {
-		return 1
-	}
 	return 3
 }
