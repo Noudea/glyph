@@ -47,7 +47,9 @@ func (m Model) filteredCommands() []core.Command {
 	}
 	out := make([]core.Command, 0, len(commands))
 	for _, cmd := range commands {
-		if strings.Contains(strings.ToLower(cmd.Label), query) || strings.Contains(strings.ToLower(cmd.ID), query) {
+		if strings.Contains(strings.ToLower(cmd.Label), query) ||
+			strings.Contains(strings.ToLower(cmd.ID), query) ||
+			strings.Contains(strings.ToLower(cmd.Shortcut), query) {
 			out = append(out, cmd)
 		}
 	}

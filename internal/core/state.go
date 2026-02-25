@@ -10,10 +10,11 @@ const (
 
 // Command describes a runnable command in the palette.
 type Command struct {
-	ID    string
-	Label string
-	Kind  CommandKind
-	Group string
+	ID       string
+	Label    string
+	Kind     CommandKind
+	Group    string
+	Shortcut string
 }
 
 // State holds shared app state across UI.

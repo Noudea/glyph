@@ -88,10 +88,17 @@ func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.mode = ModeMain
 		}
 	default:
-		if commandID, ok := m.resolveMainCommandIDForKey(key); ok && commandID == commandLauncherOpen {
+		if commandID, ok := m.resolveMainCommandIDForKey(key); ok {
+			if commandID == commandLauncherOpen {
+				m.launcherInput.Blur()
+				m.mode = ModeMain
+				return m, nil
+			}
+			actionCmd = m.executeCommand(commandID)
 			m.launcherInput.Blur()
-			m.mode = ModeMain
-			return m, nil
+			if m.mode == ModeLauncher {
+				m.mode = ModeMain
+			}
 		}
 	}
 

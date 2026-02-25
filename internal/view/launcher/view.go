@@ -45,7 +45,11 @@ func renderPanel(state ViewState) string {
 			style = active
 		}
 		b.WriteString(indicator)
-		b.WriteString(style.Render(cmd.Label))
+		line := cmd.Label
+		if cmd.Shortcut != "" {
+			line += " · " + muted.Render(cmd.Shortcut)
+		}
+		b.WriteString(style.Render(line))
 		b.WriteString("\n")
 	}
 

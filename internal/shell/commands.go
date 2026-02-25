@@ -22,7 +22,11 @@ func (m Model) launcherCommands() []core.Command {
 	commands := make([]core.Command, 0, size)
 	commands = append(commands, m.workspaceActionCommands()...)
 	if m.state != nil {
-		commands = append(commands, m.state.Commands...)
+		for _, cmd := range m.state.Commands {
+			item := cmd
+			item.Shortcut = m.primaryShortcut(item.ID, item.Shortcut)
+			commands = append(commands, item)
+		}
 	}
 	return commands
 }
@@ -50,22 +54,25 @@ func (m Model) workspaceActionCommands() []core.Command {
 	}
 	return []core.Command{
 		{
-			ID:    actionWorkspaceToggle,
-			Label: "workspace: toggle global/project",
-			Kind:  core.CommandAction,
-			Group: "workspace",
+			ID:       actionWorkspaceToggle,
+			Label:    "workspace: toggle global/project",
+			Kind:     core.CommandAction,
+			Group:    "workspace",
+			Shortcut: m.primaryShortcut(actionWorkspaceToggle, ""),
 		},
 		{
-			ID:    projectID,
-			Label: projectLabel,
-			Kind:  core.CommandAction,
-			Group: "workspace",
+			ID:       projectID,
+			Label:    projectLabel,
+			Kind:     core.CommandAction,
+			Group:    "workspace",
+			Shortcut: m.primaryShortcut(projectID, ""),
 		},
 		{
-			ID:    actionWorkspaceGlobal,
-			Label: globalLabel,
-			Kind:  core.CommandAction,
-			Group: "workspace",
+			ID:       actionWorkspaceGlobal,
+			Label:    globalLabel,
+			Kind:     core.CommandAction,
+			Group:    "workspace",
+			Shortcut: m.primaryShortcut(actionWorkspaceGlobal, ""),
 		},
 	}
 }
