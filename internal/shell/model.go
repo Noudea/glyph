@@ -58,12 +58,6 @@ func NewModel(state *core.State, workspace core.Workspace, resolver core.Workspa
 	if registry != nil {
 		state.Commands = commands
 	}
-	if len(state.OpenApps) == 0 && len(state.Commands) > 0 {
-		state.OpenApps = []string{state.Commands[0].ID}
-	}
-	if state.ActiveApp == "" && len(state.OpenApps) > 0 {
-		state.ActiveApp = state.OpenApps[0]
-	}
 	if workspace.RootPath == "" {
 		workspace = state.Workspace
 	}
@@ -74,7 +68,7 @@ func NewModel(state *core.State, workspace core.Workspace, resolver core.Workspa
 		root:          workspace.RootPath,
 		workspace:     workspace,
 		resolver:      resolver,
-		mode:          ModeMain,
+		mode:          ModeLauncher,
 		registry:      registry,
 		modules:       moduleIndex,
 		launcherInput: li,
@@ -82,6 +76,7 @@ func NewModel(state *core.State, workspace core.Workspace, resolver core.Workspa
 	if err := model.loadGlobalShortcuts(); err != nil {
 		model.err = err.Error()
 	}
+	model.openLauncher()
 	return model
 }
 
@@ -138,8 +133,17 @@ func (m *Model) refreshRegistry() {
 		return
 	}
 	m.state.Commands = commands
-	if len(m.state.OpenApps) == 0 && len(commands) > 0 {
-		m.state.OpenApps = []string{commands[0].ID}
+	validOpen := make([]string, 0, len(m.state.OpenApps))
+	for _, id := range m.state.OpenApps {
+		if _, ok := moduleIndex[id]; ok {
+			validOpen = append(validOpen, id)
+		}
+	}
+	m.state.OpenApps = validOpen
+	if m.state.ActiveApp != "" {
+		if _, ok := moduleIndex[m.state.ActiveApp]; !ok {
+			m.state.ActiveApp = ""
+		}
 	}
 	if m.state.ActiveApp == "" && len(m.state.OpenApps) > 0 {
 		m.state.ActiveApp = m.state.OpenApps[0]
