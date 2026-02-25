@@ -6,14 +6,26 @@
 
 ### Recommended (binary installer, no clone)
 
+macOS / Linux:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Noudea/glyph/main/scripts/install.sh | sh
 ```
 
-Install a specific version:
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/Noudea/glyph/main/scripts/install.ps1 | iex
+```
+
+Install a specific version (all platforms):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Noudea/glyph/main/scripts/install.sh | sh -s -- v0.1.0
+```
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Noudea/glyph/main/scripts/install.ps1))) -Version v0.1.0
 ```
 
 ### With Go
