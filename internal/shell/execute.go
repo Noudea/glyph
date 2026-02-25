@@ -10,6 +10,9 @@ func (m *Model) executeCommand(commandID string) tea.Cmd {
 	case commandLauncherOpen:
 		m.openLauncher()
 		return nil
+	case actionTabsNext:
+		m.cycleOpenApp(1)
+		return nil
 	case actionWorkspaceToggle, actionWorkspaceProject, actionWorkspaceCreate, actionWorkspaceGlobal:
 		return m.runWorkspaceAction(commandID)
 	default:

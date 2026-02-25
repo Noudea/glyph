@@ -12,6 +12,7 @@ const (
 	actionWorkspaceGlobal  = "workspace.global"
 	actionWorkspaceToggle  = "workspace.toggle"
 	actionWorkspaceCreate  = "workspace.create"
+	actionTabsNext         = "tabs.next"
 )
 
 func (m Model) launcherCommands() []core.Command {
@@ -53,6 +54,13 @@ func (m Model) workspaceActionCommands() []core.Command {
 		}
 	}
 	return []core.Command{
+		{
+			ID:       actionTabsNext,
+			Label:    "tabs: next",
+			Kind:     core.CommandAction,
+			Group:    "tabs",
+			Shortcut: m.primaryShortcut(actionTabsNext, ""),
+		},
 		{
 			ID:       actionWorkspaceToggle,
 			Label:    "workspace: toggle global/project",

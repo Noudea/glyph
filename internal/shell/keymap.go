@@ -9,6 +9,7 @@ const commandLauncherOpen = "launcher.open"
 
 var defaultMainCommandShortcuts = map[string][]string{
 	commandLauncherOpen:   {"ctrl+p", "ctrl+k", "alt+p"},
+	actionTabsNext:        {"tab"},
 	actionWorkspaceToggle: {"ctrl+w"},
 }
 
@@ -123,6 +124,7 @@ func normalizeShortcutKey(key string) string {
 func (m Model) knownCommandIDs() map[string]struct{} {
 	ids := map[string]struct{}{
 		commandLauncherOpen:    {},
+		actionTabsNext:         {},
 		actionWorkspaceToggle:  {},
 		actionWorkspaceProject: {},
 		actionWorkspaceCreate:  {},

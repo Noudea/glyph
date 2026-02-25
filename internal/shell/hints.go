@@ -9,6 +9,7 @@ func (m Model) hintText() string {
 	case ModeMain:
 		hints := []string{
 			m.workspaceHint(),
+			m.primaryShortcut(actionTabsNext, "tab") + " next tab",
 			m.primaryShortcut(actionWorkspaceToggle, "ctrl+w") + " toggle workspace",
 			m.shortcutsHint(commandLauncherOpen, "ctrl+p/ctrl+k/alt+p") + " command palette",
 		}
