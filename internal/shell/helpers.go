@@ -3,19 +3,19 @@ package shell
 import (
 	"strings"
 
-	"github.com/Noudea/glyph/internal/app"
+	"github.com/Noudea/glyph/internal/core"
 )
 
-func (m Model) openApps() []app.Command {
+func (m Model) openApps() []core.Command {
 	if m.state == nil {
 		return nil
 	}
 	if len(m.state.OpenApps) == 0 {
 		return nil
 	}
-	out := make([]app.Command, 0, len(m.state.OpenApps))
+	out := make([]core.Command, 0, len(m.state.OpenApps))
 	for _, id := range m.state.OpenApps {
-		if cmdItem, ok := m.findCommandByID(id); ok && cmdItem.Kind == app.CommandApp && m.hasModule(id) {
+		if cmdItem, ok := m.findCommandByID(id); ok && cmdItem.Kind == core.CommandApp && m.hasModule(id) {
 			out = append(out, cmdItem)
 		}
 	}
@@ -38,7 +38,7 @@ func (m *Model) cycleOpenApp(delta int) {
 	m.state.ActiveApp = open[index].ID
 }
 
-func (m Model) filteredCommands() []app.Command {
+func (m Model) filteredCommands() []core.Command {
 	if m.state == nil {
 		return nil
 	}
@@ -46,7 +46,7 @@ func (m Model) filteredCommands() []app.Command {
 	if query == "" {
 		return m.state.Commands
 	}
-	out := make([]app.Command, 0, len(m.state.Commands))
+	out := make([]core.Command, 0, len(m.state.Commands))
 	for _, cmd := range m.state.Commands {
 		if strings.Contains(strings.ToLower(cmd.Label), query) || strings.Contains(strings.ToLower(cmd.ID), query) {
 			out = append(out, cmd)
@@ -59,7 +59,7 @@ func (m *Model) openAppByID(id string) {
 	if m.state == nil || id == "" {
 		return
 	}
-	if cmd, ok := m.findCommandByID(id); !ok || cmd.Kind != app.CommandApp {
+	if cmd, ok := m.findCommandByID(id); !ok || cmd.Kind != core.CommandApp {
 		return
 	}
 	if !m.hasModule(id) {
@@ -75,16 +75,16 @@ func (m *Model) openAppByID(id string) {
 	m.state.ActiveApp = id
 }
 
-func (m Model) findCommandByID(id string) (app.Command, bool) {
+func (m Model) findCommandByID(id string) (core.Command, bool) {
 	if m.state == nil {
-		return app.Command{}, false
+		return core.Command{}, false
 	}
 	for _, cmd := range m.state.Commands {
 		if cmd.ID == id {
 			return cmd, true
 		}
 	}
-	return app.Command{}, false
+	return core.Command{}, false
 }
 
 func (m Model) inputFocused() bool {
@@ -99,14 +99,14 @@ func (m Model) inputFocused() bool {
 	}
 }
 
-func (m Model) activeModule() (app.Module, bool) {
+func (m Model) activeModule() (core.Module, bool) {
 	if m.state == nil {
 		return nil, false
 	}
 	return m.moduleByID(m.state.ActiveApp)
 }
 
-func (m Model) moduleByID(id string) (app.Module, bool) {
+func (m Model) moduleByID(id string) (core.Module, bool) {
 	if id == "" {
 		return nil, false
 	}
@@ -119,6 +119,6 @@ func (m Model) hasModule(id string) bool {
 	return ok
 }
 
-func (m Model) context() app.AppContext {
-	return app.AppContext{RootPath: m.root}
+func (m Model) context() core.CoreContext {
+	return core.CoreContext{RootPath: m.root}
 }

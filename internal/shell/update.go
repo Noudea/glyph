@@ -1,8 +1,8 @@
 package shell
 
 import (
-	"github.com/Noudea/glyph/internal/app"
-	"github.com/Noudea/glyph/internal/modules/registry"
+	"github.com/Noudea/glyph/internal/core"
+	"github.com/Noudea/glyph/internal/registry"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -94,7 +94,7 @@ func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds := m.filteredCommands()
 		if len(cmds) > 0 && m.launcherCursor >= 0 && m.launcherCursor < len(cmds) {
 			cmd := cmds[m.launcherCursor]
-			if cmd.Kind == app.CommandApp {
+			if cmd.Kind == core.CommandApp {
 				m.openAppByID(cmd.ID)
 			}
 		}

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Noudea/glyph/internal/app"
+	"github.com/Noudea/glyph/internal/core"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 )
@@ -12,7 +12,7 @@ import (
 type ViewState struct {
 	Width     int
 	Title     string
-	Tabs      []app.Command
+	Tabs      []core.Command
 	ActiveApp string
 }
 
@@ -30,7 +30,7 @@ func Render(state ViewState) string {
 	return renderTopBarLine(state.Width, parts)
 }
 
-func buildTopBarParts(width int, workspace string, tabs []app.Command, activeID string) []string {
+func buildTopBarParts(width int, workspace string, tabs []core.Command, activeID string) []string {
 	active := lipgloss.NewStyle().Foreground(lipgloss.Color("#FFD166")).Bold(true)
 	inactive := lipgloss.NewStyle().Foreground(lipgloss.Color("#7A7A7A"))
 

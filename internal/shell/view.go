@@ -1,9 +1,9 @@
 package shell
 
 import (
-	hintbarview "github.com/Noudea/glyph/internal/modules/hintbar/view"
-	launcherview "github.com/Noudea/glyph/internal/modules/launcher/view"
-	topbarview "github.com/Noudea/glyph/internal/modules/topbar/view"
+	hintbarview "github.com/Noudea/glyph/internal/view/hintbar"
+	launcherview "github.com/Noudea/glyph/internal/view/launcher"
+	topbarview "github.com/Noudea/glyph/internal/view/topbar"
 	"github.com/charmbracelet/lipgloss"
 )
 

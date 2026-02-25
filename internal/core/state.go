@@ -1,4 +1,4 @@
-package app
+package core
 
 // CommandKind describes the command type used by the launcher.
 type CommandKind string

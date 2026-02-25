@@ -3,18 +3,18 @@ package main
 import (
 	"log"
 
-	"github.com/Noudea/glyph/internal/app"
-	"github.com/Noudea/glyph/internal/modules/registry"
-	"github.com/Noudea/glyph/internal/modules/shell"
+	"github.com/Noudea/glyph/internal/core"
+	"github.com/Noudea/glyph/internal/registry"
+	"github.com/Noudea/glyph/internal/shell"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	rootPath, err := app.DefaultRootPath()
+	rootPath, err := core.DefaultRootPath()
 	if err != nil {
 		log.Fatal(err)
 	}
-	state := &app.State{}
+	state := &core.State{}
 	reg := registry.Default()
 	model := shell.NewModel(state, rootPath, reg)
 

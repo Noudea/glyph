@@ -3,8 +3,8 @@ package shell
 import (
 	"sort"
 
-	"github.com/Noudea/glyph/internal/app"
-	"github.com/Noudea/glyph/internal/modules/registry"
+	"github.com/Noudea/glyph/internal/core"
+	"github.com/Noudea/glyph/internal/registry"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -18,13 +18,13 @@ const (
 
 // Model drives the UI.
 type Model struct {
-	state *app.State
+	state *core.State
 	root  string
 
 	mode Mode
 
 	registry *registry.Registry
-	modules  map[string]app.Module
+	modules  map[string]core.Module
 	err      string
 
 	launcherInput  textinput.Model
@@ -34,9 +34,9 @@ type Model struct {
 	height int
 }
 
-func NewModel(state *app.State, rootPath string, registry *registry.Registry) *Model {
+func NewModel(state *core.State, rootPath string, registry *registry.Registry) *Model {
 	if state == nil {
-		state = &app.State{}
+		state = &core.State{}
 	}
 	li := textinput.New()
 	li.Placeholder = "command"
@@ -44,7 +44,7 @@ func NewModel(state *app.State, rootPath string, registry *registry.Registry) *M
 	li.Width = 24
 	li.Prompt = "> "
 
-	moduleIndex := make(map[string]app.Module)
+	moduleIndex := make(map[string]core.Module)
 	if registry != nil {
 		moduleIndex, _ = indexModules(registry.Modules())
 	}
@@ -72,7 +72,7 @@ func (m *Model) Init() tea.Cmd {
 	return moduleInitCmd(m.modules, m.context())
 }
 
-func moduleInitCmd(modules map[string]app.Module, ctx app.AppContext) tea.Cmd {
+func moduleInitCmd(modules map[string]core.Module, ctx core.CoreContext) tea.Cmd {
 	if len(modules) == 0 {
 		return nil
 	}
@@ -86,9 +86,9 @@ func moduleInitCmd(modules map[string]app.Module, ctx app.AppContext) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func indexModules(modules []app.Module) (map[string]app.Module, []app.Command) {
-	moduleIndex := make(map[string]app.Module, len(modules))
-	commands := make([]app.Command, 0, len(modules))
+func indexModules(modules []core.Module) (map[string]core.Module, []core.Command) {
+	moduleIndex := make(map[string]core.Module, len(modules))
+	commands := make([]core.Command, 0, len(modules))
 	for _, module := range modules {
 		if module == nil {
 			continue
@@ -98,10 +98,10 @@ func indexModules(modules []app.Module) (map[string]app.Module, []app.Command) {
 			continue
 		}
 		moduleIndex[id] = module
-		commands = append(commands, app.Command{
+		commands = append(commands, core.Command{
 			ID:    id,
 			Label: module.Title(),
-			Kind:  app.CommandApp,
+			Kind:  core.CommandApp,
 			Group: "apps",
 		})
 	}

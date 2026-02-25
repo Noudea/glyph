@@ -3,13 +3,13 @@ package view
 import (
 	"strings"
 
-	"github.com/Noudea/glyph/internal/app"
+	"github.com/Noudea/glyph/internal/core"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type ViewState struct {
 	InputView string
-	Commands  []app.Command
+	Commands  []core.Command
 	Cursor    int
 	Width     int
 	Height    int

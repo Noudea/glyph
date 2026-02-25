@@ -5,19 +5,19 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Noudea/glyph/internal/app"
+	"github.com/Noudea/glyph/internal/core"
 	tasksmodule "github.com/Noudea/glyph/internal/modules/tasks/module"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Registry struct {
 	mu      sync.Mutex
-	modules map[string]app.Module
+	modules map[string]core.Module
 	notify  func(tea.Msg)
 }
 
 func New() *Registry {
-	return &Registry{modules: make(map[string]app.Module)}
+	return &Registry{modules: make(map[string]core.Module)}
 }
 
 func Default() *Registry {
@@ -35,7 +35,7 @@ func (r *Registry) SetNotifier(notify func(tea.Msg)) {
 	r.notify = notify
 }
 
-func (r *Registry) Register(module app.Module) bool {
+func (r *Registry) Register(module core.Module) bool {
 	if module == nil {
 		return false
 	}
@@ -45,7 +45,7 @@ func (r *Registry) Register(module app.Module) bool {
 	}
 	r.mu.Lock()
 	if r.modules == nil {
-		r.modules = make(map[string]app.Module)
+		r.modules = make(map[string]core.Module)
 	}
 	if _, exists := r.modules[id]; exists {
 		r.mu.Unlock()
@@ -60,20 +60,20 @@ func (r *Registry) Register(module app.Module) bool {
 	return true
 }
 
-func (r *Registry) Modules() []app.Module {
+func (r *Registry) Modules() []core.Module {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	out := make([]app.Module, 0, len(r.modules))
+	out := make([]core.Module, 0, len(r.modules))
 	for _, module := range r.modules {
 		out = append(out, module)
 	}
 	return out
 }
 
-func (r *Registry) Commands() []app.Command {
+func (r *Registry) Commands() []core.Command {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	commands := make([]app.Command, 0, len(r.modules))
+	commands := make([]core.Command, 0, len(r.modules))
 	for _, module := range r.modules {
 		if module == nil {
 			continue
@@ -82,10 +82,10 @@ func (r *Registry) Commands() []app.Command {
 		if id == "" {
 			continue
 		}
-		commands = append(commands, app.Command{
+		commands = append(commands, core.Command{
 			ID:    id,
 			Label: module.Title(),
-			Kind:  app.CommandApp,
+			Kind:  core.CommandApp,
 			Group: "apps",
 		})
 	}
