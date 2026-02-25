@@ -39,8 +39,5 @@ func Render(state ViewState) string {
 }
 
 func Height(width int) int {
-	if width <= 0 {
-		return 1
-	}
-	return 3
+	return 1
 }

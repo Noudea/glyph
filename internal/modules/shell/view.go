@@ -21,8 +21,7 @@ func (m *Model) View() string {
 		}
 	}
 
-	m.height = contentHeight
-	content := m.renderContent()
+	content := m.renderContent(contentHeight)
 
 	if hints == "" {
 		return content
@@ -30,24 +29,24 @@ func (m *Model) View() string {
 	return lipgloss.JoinVertical(lipgloss.Left, content, hints)
 }
 
-func (m *Model) renderContent() string {
+func (m *Model) renderContent(contentHeight int) string {
 	switch m.mode {
 	case ModeMain:
-		return renderMain(m)
+		return renderMain(m, contentHeight)
 	case ModeLauncher:
 		return launcherview.Render(launcherview.ViewState{
 			InputView: m.launcherInput.View(),
 			Commands:  m.filteredCommands(),
 			Cursor:    m.launcherCursor,
 			Width:     m.width,
-			Height:    m.height,
+			Height:    contentHeight,
 		})
 	default:
-		return renderMain(m)
+		return renderMain(m, contentHeight)
 	}
 }
 
-func renderMain(m *Model) string {
+func renderMain(m *Model, contentHeight int) string {
 	top := topbarview.Render(topbarview.ViewState{
 		Width:     m.width,
 		Title:     "glyph",
@@ -59,8 +58,8 @@ func renderMain(m *Model) string {
 	}
 
 	body := ""
-	if m.height > 0 {
-		bodyHeight := m.height - topbarview.Height(m.width)
+	if contentHeight > 0 {
+		bodyHeight := contentHeight - topbarview.Height(m.width)
 		if bodyHeight < 1 {
 			bodyHeight = 1
 		}

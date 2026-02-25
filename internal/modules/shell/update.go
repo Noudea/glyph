@@ -70,6 +70,7 @@ func (m *Model) updateMain(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.launcherInput, cmd = m.launcherInput.Update(msg)
+	m.clampLauncherCursor()
 
 	key := ""
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
@@ -102,4 +103,19 @@ func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, cmd
+}
+
+func (m *Model) clampLauncherCursor() {
+	cmds := m.filteredCommands()
+	if len(cmds) == 0 {
+		m.launcherCursor = 0
+		return
+	}
+	if m.launcherCursor < 0 {
+		m.launcherCursor = 0
+		return
+	}
+	if m.launcherCursor >= len(cmds) {
+		m.launcherCursor = len(cmds) - 1
+	}
 }
