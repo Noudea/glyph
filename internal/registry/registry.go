@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/Noudea/glyph/internal/core"
-	tasksmodule "github.com/Noudea/glyph/internal/modules/tasks/module"
+	tasksmodule "github.com/Noudea/glyph/internal/modules/tasks"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

@@ -29,10 +29,6 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	}
 
-	if key == "q" && !m.inputFocused() {
-		return m, tea.Quit
-	}
-
 	switch m.mode {
 	case ModeMain:
 		return m.updateMain(msg)
@@ -45,17 +41,11 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 func (m *Model) updateMain(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
-	switch key {
-	case "ctrl+p", "c":
+
+	if key == "ctrl+p" || key == "ctrl+k" || key == "alt+p" {
 		m.mode = ModeLauncher
 		m.launcherInput.SetValue("")
 		m.launcherInput.Focus()
-	case "tab", "right", "l":
-		m.cycleOpenApp(1)
-	case "shift+tab", "left", "h":
-		m.cycleOpenApp(-1)
-	}
-	if m.mode != ModeMain {
 		return m, nil
 	}
 
@@ -78,7 +68,7 @@ func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch key {
-	case "esc", "ctrl+p":
+	case "esc", "ctrl+p", "ctrl+k", "alt+p":
 		m.launcherInput.Blur()
 		m.mode = ModeMain
 		return m, nil

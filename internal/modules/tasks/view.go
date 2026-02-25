@@ -1,13 +1,12 @@
-package view
+package tasks
 
 import (
 	"strings"
 
-	"github.com/Noudea/glyph/internal/modules/tasks"
 	"github.com/charmbracelet/lipgloss"
 )
 
-func Render(state tasks.ViewModel) string {
+func Render(state ViewModel) string {
 	var b strings.Builder
 	muted := lipgloss.NewStyle().Foreground(lipgloss.Color("#7A7A7A"))
 	active := lipgloss.NewStyle().Foreground(lipgloss.Color("#E2E2E2")).Bold(true)

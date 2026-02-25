@@ -87,18 +87,6 @@ func (m Model) findCommandByID(id string) (core.Command, bool) {
 	return core.Command{}, false
 }
 
-func (m Model) inputFocused() bool {
-	switch m.mode {
-	case ModeLauncher:
-		return m.launcherInput.Focused()
-	default:
-		if module, ok := m.activeModule(); ok {
-			return module.InputFocused()
-		}
-		return false
-	}
-}
-
 func (m Model) activeModule() (core.Module, bool) {
 	if m.state == nil {
 		return nil, false

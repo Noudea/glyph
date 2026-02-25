@@ -70,10 +70,6 @@ func (m *Model) SetRoot(path string) error {
 	return m.load()
 }
 
-func (m Model) InputFocused() bool {
-	return m.input.Focused()
-}
-
 func (m Model) Hint() string {
 	if m.mode == inputAdd {
 		return "tasks: enter add · esc cancel"

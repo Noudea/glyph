@@ -1,20 +1,18 @@
-package module
+package tasks
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/Noudea/glyph/internal/core"
-	"github.com/Noudea/glyph/internal/modules/tasks"
-	tasksview "github.com/Noudea/glyph/internal/modules/tasks/view"
 )
 
 type Module struct {
-	model    tasks.Model
+	model    Model
 	rootPath string
 }
 
 func NewModule() core.Module {
-	return &Module{model: tasks.NewModel()}
+	return &Module{model: NewModel()}
 }
 
 func (m *Module) ID() string {
@@ -42,15 +40,11 @@ func (m *Module) Update(ctx core.CoreContext, msg tea.Msg) (core.Module, tea.Cmd
 }
 
 func (m *Module) View(width, height int) string {
-	return tasksview.Render(m.model.ViewModel(width, height))
+	return Render(m.model.ViewModel(width, height))
 }
 
 func (m *Module) Hint() string {
 	return m.model.Hint()
-}
-
-func (m *Module) InputFocused() bool {
-	return m.model.InputFocused()
 }
 
 func (m *Module) ensureContext(ctx core.CoreContext) {
