@@ -5,12 +5,12 @@ import "strings"
 func (m Model) hintText() string {
 	switch m.mode {
 	case ModeLauncher:
-		return "type to filter · ↑/↓ move · enter run · esc/ctrl+p/ctrl+k/alt+p close"
+		return "type to filter · ↑/↓ move · enter run · esc/" + m.shortcutsHint(commandLauncherOpen, "ctrl+p/ctrl+k/alt+p") + " close"
 	case ModeMain:
 		hints := []string{
 			m.workspaceHint(),
-			"ctrl+w toggle workspace",
-			"ctrl+p, ctrl+k, or alt+p command palette",
+			m.primaryShortcut(actionWorkspaceToggle, "ctrl+w") + " toggle workspace",
+			m.shortcutsHint(commandLauncherOpen, "ctrl+p/ctrl+k/alt+p") + " command palette",
 		}
 		if m.err != "" {
 			hints = append([]string{"error: " + m.err}, hints...)

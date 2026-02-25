@@ -1,7 +1,6 @@
 package shell
 
 import (
-	"github.com/Noudea/glyph/internal/core"
 	"github.com/Noudea/glyph/internal/registry"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -42,14 +41,8 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 func (m *Model) updateMain(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 
-	if key == "ctrl+p" || key == "ctrl+k" || key == "alt+p" {
-		m.mode = ModeLauncher
-		m.launcherInput.SetValue("")
-		m.launcherInput.Focus()
-		return m, nil
-	}
-	if key == "ctrl+w" {
-		return m, m.runAction(actionWorkspaceToggle)
+	if commandID, ok := m.resolveMainCommandIDForKey(key); ok {
+		return m, m.executeCommand(commandID)
 	}
 
 	if module, ok := m.activeModule(); ok {
@@ -72,7 +65,7 @@ func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch key {
-	case "esc", "ctrl+p", "ctrl+k", "alt+p":
+	case "esc":
 		m.launcherInput.Blur()
 		m.mode = ModeMain
 		return m, nil
@@ -88,15 +81,18 @@ func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds := m.filteredCommands()
 		if len(cmds) > 0 && m.launcherCursor >= 0 && m.launcherCursor < len(cmds) {
 			selected := cmds[m.launcherCursor]
-			switch selected.Kind {
-			case core.CommandApp:
-				m.openAppByID(selected.ID)
-			case core.CommandAction:
-				actionCmd = m.runAction(selected.ID)
-			}
+			actionCmd = m.executeCommand(selected.ID)
 		}
 		m.launcherInput.Blur()
-		m.mode = ModeMain
+		if m.mode == ModeLauncher {
+			m.mode = ModeMain
+		}
+	default:
+		if commandID, ok := m.resolveMainCommandIDForKey(key); ok && commandID == commandLauncherOpen {
+			m.launcherInput.Blur()
+			m.mode = ModeMain
+			return m, nil
+		}
 	}
 
 	return m, tea.Batch(inputCmd, actionCmd)
@@ -114,55 +110,5 @@ func (m *Model) clampLauncherCursor() {
 	}
 	if m.launcherCursor >= len(cmds) {
 		m.launcherCursor = len(cmds) - 1
-	}
-}
-
-func (m *Model) runAction(actionID string) tea.Cmd {
-	resolve := func(kind core.WorkspaceKind) (core.Workspace, error) {
-		if kind == core.WorkspaceProject {
-			return m.resolver.ResolveProject(true)
-		}
-		return m.resolver.ResolveGlobal()
-	}
-
-	switch actionID {
-	case actionWorkspaceToggle:
-		if m.workspace.Kind == core.WorkspaceProject {
-			workspace, err := resolve(core.WorkspaceGlobal)
-			if err != nil {
-				m.err = err.Error()
-				return nil
-			}
-			return m.setWorkspace(workspace)
-		}
-		workspace, err := resolve(core.WorkspaceProject)
-		if err != nil {
-			m.err = err.Error()
-			return nil
-		}
-		return m.setWorkspace(workspace)
-	case actionWorkspaceProject:
-		workspace, err := resolve(core.WorkspaceProject)
-		if err != nil {
-			m.err = err.Error()
-			return nil
-		}
-		return m.setWorkspace(workspace)
-	case actionWorkspaceCreate:
-		workspace, err := resolve(core.WorkspaceProject)
-		if err != nil {
-			m.err = err.Error()
-			return nil
-		}
-		return m.setWorkspace(workspace)
-	case actionWorkspaceGlobal:
-		workspace, err := resolve(core.WorkspaceGlobal)
-		if err != nil {
-			m.err = err.Error()
-			return nil
-		}
-		return m.setWorkspace(workspace)
-	default:
-		return nil
 	}
 }

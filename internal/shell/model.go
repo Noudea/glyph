@@ -16,13 +16,6 @@ const (
 	ModeLauncher
 )
 
-const (
-	actionWorkspaceProject = "workspace.project"
-	actionWorkspaceGlobal  = "workspace.global"
-	actionWorkspaceToggle  = "workspace.toggle"
-	actionWorkspaceCreate  = "workspace.create"
-)
-
 // Model drives the UI.
 type Model struct {
 	state *core.State
@@ -40,6 +33,9 @@ type Model struct {
 	launcherInput  textinput.Model
 	launcherCursor int
 
+	commandShortcuts map[string][]string
+	shortcutCommands map[string]string
+
 	width  int
 	height int
 }
@@ -55,11 +51,12 @@ func NewModel(state *core.State, workspace core.Workspace, resolver core.Workspa
 	li.Prompt = "> "
 
 	moduleIndex := make(map[string]core.Module)
+	commands := make([]core.Command, 0)
 	if registry != nil {
-		moduleIndex, _ = indexModules(registry.Modules())
+		moduleIndex, commands = indexModules(registry.Modules())
 	}
-	if state.Commands == nil && registry != nil {
-		state.Commands = registry.Commands()
+	if registry != nil {
+		state.Commands = commands
 	}
 	if len(state.OpenApps) == 0 && len(state.Commands) > 0 {
 		state.OpenApps = []string{state.Commands[0].ID}
@@ -72,7 +69,7 @@ func NewModel(state *core.State, workspace core.Workspace, resolver core.Workspa
 	}
 	state.Workspace = workspace
 
-	return &Model{
+	model := &Model{
 		state:         state,
 		root:          workspace.RootPath,
 		workspace:     workspace,
@@ -82,6 +79,10 @@ func NewModel(state *core.State, workspace core.Workspace, resolver core.Workspa
 		modules:       moduleIndex,
 		launcherInput: li,
 	}
+	if err := model.loadGlobalShortcuts(); err != nil {
+		model.err = err.Error()
+	}
+	return model
 }
 
 func (m *Model) Init() tea.Cmd {
@@ -160,6 +161,10 @@ func (m *Model) setWorkspace(workspace core.Workspace) tea.Cmd {
 	if m.state != nil {
 		m.state.Workspace = workspace
 	}
-	m.err = ""
+	if err := m.loadGlobalShortcuts(); err != nil {
+		m.err = err.Error()
+	} else {
+		m.err = ""
+	}
 	return moduleInitCmd(m.modules, m.context())
 }

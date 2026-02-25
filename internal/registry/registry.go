@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"sort"
 	"strings"
 	"sync"
 
@@ -68,31 +67,6 @@ func (r *Registry) Modules() []core.Module {
 		out = append(out, module)
 	}
 	return out
-}
-
-func (r *Registry) Commands() []core.Command {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	commands := make([]core.Command, 0, len(r.modules))
-	for _, module := range r.modules {
-		if module == nil {
-			continue
-		}
-		id := module.ID()
-		if id == "" {
-			continue
-		}
-		commands = append(commands, core.Command{
-			ID:    id,
-			Label: module.Title(),
-			Kind:  core.CommandApp,
-			Group: "apps",
-		})
-	}
-	sort.Slice(commands, func(i, j int) bool {
-		return commands[i].Label < commands[j].Label
-	})
-	return commands
 }
 
 func (r *Registry) Unregister(id string) bool {
