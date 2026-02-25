@@ -7,7 +7,14 @@ func (m Model) hintText() string {
 	case ModeLauncher:
 		return "type to filter · ↑/↓ move · enter run · esc/ctrl+p/ctrl+k/alt+p close"
 	case ModeMain:
-		hints := []string{"ctrl+p, ctrl+k, or alt+p command palette"}
+		hints := []string{
+			m.workspaceHint(),
+			"ctrl+w toggle workspace",
+			"ctrl+p, ctrl+k, or alt+p command palette",
+		}
+		if m.err != "" {
+			hints = append([]string{"error: " + m.err}, hints...)
+		}
 		if appHint := m.appHint(); appHint != "" {
 			hints = append([]string{appHint}, hints...)
 		}

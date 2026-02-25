@@ -48,6 +48,9 @@ func (m *Model) updateMain(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.launcherInput.Focus()
 		return m, nil
 	}
+	if key == "ctrl+w" {
+		return m, m.runAction(actionWorkspaceToggle)
+	}
 
 	if module, ok := m.activeModule(); ok {
 		updated, cmd := module.Update(m.context(), msg)
@@ -58,9 +61,10 @@ func (m *Model) updateMain(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	m.launcherInput, cmd = m.launcherInput.Update(msg)
+	var inputCmd tea.Cmd
+	m.launcherInput, inputCmd = m.launcherInput.Update(msg)
 	m.clampLauncherCursor()
+	var actionCmd tea.Cmd
 
 	key := ""
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
@@ -83,16 +87,19 @@ func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case "enter":
 		cmds := m.filteredCommands()
 		if len(cmds) > 0 && m.launcherCursor >= 0 && m.launcherCursor < len(cmds) {
-			cmd := cmds[m.launcherCursor]
-			if cmd.Kind == core.CommandApp {
-				m.openAppByID(cmd.ID)
+			selected := cmds[m.launcherCursor]
+			switch selected.Kind {
+			case core.CommandApp:
+				m.openAppByID(selected.ID)
+			case core.CommandAction:
+				actionCmd = m.runAction(selected.ID)
 			}
 		}
 		m.launcherInput.Blur()
 		m.mode = ModeMain
 	}
 
-	return m, cmd
+	return m, tea.Batch(inputCmd, actionCmd)
 }
 
 func (m *Model) clampLauncherCursor() {
@@ -107,5 +114,55 @@ func (m *Model) clampLauncherCursor() {
 	}
 	if m.launcherCursor >= len(cmds) {
 		m.launcherCursor = len(cmds) - 1
+	}
+}
+
+func (m *Model) runAction(actionID string) tea.Cmd {
+	resolve := func(kind core.WorkspaceKind) (core.Workspace, error) {
+		if kind == core.WorkspaceProject {
+			return m.resolver.ResolveProject(true)
+		}
+		return m.resolver.ResolveGlobal()
+	}
+
+	switch actionID {
+	case actionWorkspaceToggle:
+		if m.workspace.Kind == core.WorkspaceProject {
+			workspace, err := resolve(core.WorkspaceGlobal)
+			if err != nil {
+				m.err = err.Error()
+				return nil
+			}
+			return m.setWorkspace(workspace)
+		}
+		workspace, err := resolve(core.WorkspaceProject)
+		if err != nil {
+			m.err = err.Error()
+			return nil
+		}
+		return m.setWorkspace(workspace)
+	case actionWorkspaceProject:
+		workspace, err := resolve(core.WorkspaceProject)
+		if err != nil {
+			m.err = err.Error()
+			return nil
+		}
+		return m.setWorkspace(workspace)
+	case actionWorkspaceCreate:
+		workspace, err := resolve(core.WorkspaceProject)
+		if err != nil {
+			m.err = err.Error()
+			return nil
+		}
+		return m.setWorkspace(workspace)
+	case actionWorkspaceGlobal:
+		workspace, err := resolve(core.WorkspaceGlobal)
+		if err != nil {
+			m.err = err.Error()
+			return nil
+		}
+		return m.setWorkspace(workspace)
+	default:
+		return nil
 	}
 }

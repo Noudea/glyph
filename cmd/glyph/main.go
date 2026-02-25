@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/Noudea/glyph/internal/core"
 	"github.com/Noudea/glyph/internal/registry"
@@ -10,13 +11,18 @@ import (
 )
 
 func main() {
-	rootPath, err := core.DefaultRootPath()
+	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
-	state := &core.State{}
+	resolver := core.NewWorkspaceResolver(cwd)
+	workspace, err := resolver.ResolveInitial()
+	if err != nil {
+		log.Fatal(err)
+	}
+	state := &core.State{Workspace: workspace}
 	reg := registry.Default()
-	model := shell.NewModel(state, rootPath, reg)
+	model := shell.NewModel(state, workspace, resolver, reg)
 
 	program := tea.NewProgram(model, tea.WithAltScreen())
 	reg.SetNotifier(program.Send)

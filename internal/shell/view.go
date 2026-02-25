@@ -49,7 +49,7 @@ func (m *Model) renderContent(contentHeight int) string {
 func renderMain(m *Model, contentHeight int) string {
 	top := topbarview.Render(topbarview.ViewState{
 		Width:     m.width,
-		Title:     "glyph",
+		Title:     m.workspaceTitle(),
 		Tabs:      m.openApps(),
 		ActiveApp: m.state.ActiveApp,
 	})

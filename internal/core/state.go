@@ -21,4 +21,5 @@ type State struct {
 	ActiveApp string
 	OpenApps  []string
 	Commands  []Command
+	Workspace Workspace
 }

@@ -16,10 +16,20 @@ const (
 	ModeLauncher
 )
 
+const (
+	actionWorkspaceProject = "workspace.project"
+	actionWorkspaceGlobal  = "workspace.global"
+	actionWorkspaceToggle  = "workspace.toggle"
+	actionWorkspaceCreate  = "workspace.create"
+)
+
 // Model drives the UI.
 type Model struct {
 	state *core.State
 	root  string
+
+	workspace core.Workspace
+	resolver  core.WorkspaceResolver
 
 	mode Mode
 
@@ -34,7 +44,7 @@ type Model struct {
 	height int
 }
 
-func NewModel(state *core.State, rootPath string, registry *registry.Registry) *Model {
+func NewModel(state *core.State, workspace core.Workspace, resolver core.WorkspaceResolver, registry *registry.Registry) *Model {
 	if state == nil {
 		state = &core.State{}
 	}
@@ -57,10 +67,16 @@ func NewModel(state *core.State, rootPath string, registry *registry.Registry) *
 	if state.ActiveApp == "" && len(state.OpenApps) > 0 {
 		state.ActiveApp = state.OpenApps[0]
 	}
+	if workspace.RootPath == "" {
+		workspace = state.Workspace
+	}
+	state.Workspace = workspace
 
 	return &Model{
 		state:         state,
-		root:          rootPath,
+		root:          workspace.RootPath,
+		workspace:     workspace,
+		resolver:      resolver,
 		mode:          ModeMain,
 		registry:      registry,
 		modules:       moduleIndex,
@@ -127,4 +143,23 @@ func (m *Model) refreshRegistry() {
 	if m.state.ActiveApp == "" && len(m.state.OpenApps) > 0 {
 		m.state.ActiveApp = m.state.OpenApps[0]
 	}
+}
+
+func (m *Model) setWorkspace(workspace core.Workspace) tea.Cmd {
+	if workspace.RootPath == "" {
+		return nil
+	}
+	if m.workspace.Kind == workspace.Kind &&
+		m.workspace.RootPath == workspace.RootPath &&
+		m.workspace.ProjectPath == workspace.ProjectPath {
+		return nil
+	}
+
+	m.workspace = workspace
+	m.root = workspace.RootPath
+	if m.state != nil {
+		m.state.Workspace = workspace
+	}
+	m.err = ""
+	return moduleInitCmd(m.modules, m.context())
 }

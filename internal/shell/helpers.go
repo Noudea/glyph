@@ -1,6 +1,8 @@
 package shell
 
 import (
+	"errors"
+	"path/filepath"
 	"strings"
 
 	"github.com/Noudea/glyph/internal/core"
@@ -39,20 +41,74 @@ func (m *Model) cycleOpenApp(delta int) {
 }
 
 func (m Model) filteredCommands() []core.Command {
-	if m.state == nil {
-		return nil
-	}
+	commands := m.launcherCommands()
 	query := strings.TrimSpace(strings.ToLower(m.launcherInput.Value()))
 	if query == "" {
-		return m.state.Commands
+		return commands
 	}
-	out := make([]core.Command, 0, len(m.state.Commands))
-	for _, cmd := range m.state.Commands {
+	out := make([]core.Command, 0, len(commands))
+	for _, cmd := range commands {
 		if strings.Contains(strings.ToLower(cmd.Label), query) || strings.Contains(strings.ToLower(cmd.ID), query) {
 			out = append(out, cmd)
 		}
 	}
 	return out
+}
+
+func (m Model) launcherCommands() []core.Command {
+	size := len(m.workspaceCommands())
+	if m.state != nil {
+		size += len(m.state.Commands)
+	}
+	commands := make([]core.Command, 0, size)
+	commands = append(commands, m.workspaceCommands()...)
+	if m.state != nil {
+		commands = append(commands, m.state.Commands...)
+	}
+	return commands
+}
+
+func (m Model) workspaceCommands() []core.Command {
+	projectID := actionWorkspaceProject
+	projectLabel := "workspace: use project"
+	globalLabel := "workspace: use global"
+	if m.workspace.Kind == core.WorkspaceProject {
+		projectLabel = "workspace: use project [active]"
+	} else {
+		globalLabel = "workspace: use global [active]"
+		project, err := m.resolver.ResolveProject(false)
+		switch {
+		case err == nil:
+			projectName := filepath.Base(project.ProjectPath)
+			if projectName == "." || projectName == string(filepath.Separator) || projectName == "" {
+				projectName = "project"
+			}
+			projectLabel = "workspace: use project (" + projectName + ")"
+		case errors.Is(err, core.ErrNoProjectWorkspace):
+			projectID = actionWorkspaceCreate
+			projectLabel = "workspace: create project workspace"
+		}
+	}
+	return []core.Command{
+		{
+			ID:    actionWorkspaceToggle,
+			Label: "workspace: toggle global/project",
+			Kind:  core.CommandAction,
+			Group: "workspace",
+		},
+		{
+			ID:    projectID,
+			Label: projectLabel,
+			Kind:  core.CommandAction,
+			Group: "workspace",
+		},
+		{
+			ID:    actionWorkspaceGlobal,
+			Label: globalLabel,
+			Kind:  core.CommandAction,
+			Group: "workspace",
+		},
+	}
 }
 
 func (m *Model) openAppByID(id string) {
@@ -109,4 +165,29 @@ func (m Model) hasModule(id string) bool {
 
 func (m Model) context() core.CoreContext {
 	return core.CoreContext{RootPath: m.root}
+}
+
+func (m Model) workspaceTitle() string {
+	if m.workspace.Kind == core.WorkspaceProject {
+		name := filepath.Base(m.workspace.ProjectPath)
+		if name == "." || name == string(filepath.Separator) || name == "" {
+			name = "project"
+		}
+		return "glyph · project:" + name
+	}
+	return "glyph · global"
+}
+
+func (m Model) workspaceHint() string {
+	if m.workspace.Kind == core.WorkspaceProject {
+		if m.workspace.ProjectPath == "" {
+			return "workspace: project"
+		}
+		name := filepath.Base(m.workspace.ProjectPath)
+		if name == "." || name == string(filepath.Separator) || name == "" {
+			name = m.workspace.ProjectPath
+		}
+		return "workspace: project (" + name + ")"
+	}
+	return "workspace: global"
 }
