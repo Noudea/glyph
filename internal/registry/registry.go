@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/Noudea/glyph/internal/core"
+	scratchpadmodule "github.com/Noudea/glyph/internal/modules/scratchpad"
 	tasksmodule "github.com/Noudea/glyph/internal/modules/tasks"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -21,6 +22,7 @@ func New() *Registry {
 
 func Default() *Registry {
 	r := New()
+	_ = r.Register(scratchpadmodule.NewModule())
 	_ = r.Register(tasksmodule.NewModule())
 	return r
 }
