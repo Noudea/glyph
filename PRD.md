@@ -1,325 +1,230 @@
-# 🧿 Glyph v0.1 — Product Requirements Document (PRD)
+# Glyph v1 - Product Requirements Document (PRD)
 
 ## 1. Overview
 
 **Product Name:** Glyph  
-**Version:** v0.1 (MVP)  
+**Version:** v1 (MVP pivot)  
 **Platform:** Terminal (TUI)  
-**Tech Stack:** Go + Charm (Bubble Tea, Lip Gloss, Bubbles, Glamour)
+**Tech Stack:** Go + Charm (Bubble Tea, Lip Gloss, Bubbles)
 
-### Vision
+### Product Direction
 
-Glyph is a playful yet powerful developer workspace inside the terminal.
+Glyph is a super command palette launcher for terminal workflows.
 
 It helps developers:
 
-- Track active tasks
-- Write and preview notes
-- Maintain focus within project contexts
+- Launch frequently used CLI/TUI tools fast
+- Trigger repeatable shell commands from keyboard shortcuts
+- Stay in flow without leaving the terminal
 
-Glyph is not a task manager.  
-Glyph is not a note-taking app.  
-Glyph is a developer focus environment.
-
----
+Glyph v1 is not a task manager and not a notes app.
 
 ## 2. Problem Statement
 
-Developers often:
+Terminal users repeatedly type the same commands and switch between tools manually.
+This creates friction, context switching, and inconsistent workflows.
 
-- Switch between multiple projects
-- Lose track of active tasks
-- Scatter notes across files and apps
-- Break flow when switching tools
+Glyph solves this with a keyboard-first command palette plus user-defined shortcuts.
 
-Existing tools are either:
+## 3. Goals (v1)
 
-- Too heavy (Notion, Jira)
-- Too simple (todo.txt)
-- Not terminal-native
-- Not context-aware
+1. Launch commands quickly from a searchable palette.
+2. Let users and teams define custom commands, and let users define personal shortcuts.
+3. Execute commands in the current terminal and current folder.
+4. Keep startup and interaction fast enough for daily use.
+5. Provide predictable behavior and clear failure feedback.
 
-Glyph solves this by creating a structured, lightweight, terminal-native workspace for focused building.
+## 4. Non-Goals (v1)
 
----
+- Tasks, notes, scratchpad features
+- Marketplace / package installation
+- Launching in a new terminal window
+- Background jobs / daemonized execution
+- Project-level shortcuts (team keymaps) in v1
+- Plugin system, sync/cloud, AI features
 
-## 3. Goals (MVP)
+## 5. Core Product Principles
 
-1. Provide structured workspaces for context separation
-2. Allow full in-TUI editing of notes and tasks
-3. Maintain a clean Charm-inspired aesthetic
-4. Be fast and keyboard-first
-5. Be usable daily by the creator
-
----
-
-## 4. Non-Goals (v0.1)
-
-- Plugin system
-- Command launcher
-- Git integration
-- Sync/cloud features
-- AI features
-- Multi-user support
-- Due dates, priorities, tagging
-- Mobile/GUI version
-
----
-
-## 5. Core Concepts
-
-### 5.1 Workspace
-
-A workspace is a container for:
-
-- Tasks
-- Notes
-- Scratchpad
-
-Each workspace is isolated.
-
-Storage structure:
-
-~/.glyph/workspaces/<workspace_name>/
-tasks.json
-notes.md
-scratch.md
-
----
-
-### 5.2 Apps Inside Glyph
-
-Inside a workspace, Glyph behaves like a small OS with internal “apps”:
-
-- Tasks
-- Notes
-- Scratch
-
-Each app has:
-
-- Browse mode
-- Edit mode
-- Preview mode (for markdown content)
-
----
+1. Keyboard-first: open, search, run with minimal keystrokes.
+2. Predictable execution: always run where Glyph started.
+3. Minimal config surface: simple JSON, low ceremony.
+4. Fail safely: invalid config or command failures must not crash the app.
 
 ## 6. Functional Requirements
 
----
+### 6.1 Command Palette
 
-## 6.1 Workspace Management
+Required behavior:
 
-### Required
+- Open palette via global shortcut(s).
+- Filter commands by label, ID, and shortcut text.
+- Navigate with keyboard and run selected command with `enter`.
+- Close palette with `esc`.
 
-- Create workspace
-- List workspaces
-- Switch workspace
-- Persist last opened workspace
-- Delete workspace (optional for MVP)
+### 6.2 Custom Commands
 
-### Behavior
+Users can define commands in a config file.
 
-- On first launch → prompt to create workspace
-- On subsequent launches → open last used workspace
+Each command must support:
 
----
+- `id` (string, unique)
+- `label` (string, human-readable)
+- `run` (string, shell command)
+- `enabled` (boolean, optional; default `true`)
 
-## 6.2 Tasks App
+Rules:
 
-### Task Data Model
+- Disabled commands are hidden and cannot be executed.
+- Invalid entries are skipped with a visible error hint.
+- Duplicate IDs are rejected deterministically (first valid wins).
 
-Each task contains:
+### 6.3 Custom Shortcuts
 
-- id
-- title
-- done (boolean)
-- description (markdown, optional)
-- created_at
+Users can map shortcuts to command IDs.
 
-Stored in tasks.json.
+Rules:
 
----
+- Shortcuts are normalized and case-insensitive.
+- Shortcut collisions are rejected with clear error messaging.
+- Reserved keys cannot be overridden (at minimum app quit and launcher toggle keys).
+- A command can have multiple shortcuts; first is primary display shortcut.
 
-### Task Features (Must Have)
+### 6.4 Execution Model
 
-- Add task
-- Edit task title (inline)
-- Toggle done
-- Delete task
-- Persist to disk
+When a command is launched (palette or shortcut):
 
----
+- Execute in the current terminal session (no new window).
+- Execute in the current working directory from which Glyph was started.
+- Hand terminal control to the launched process.
+- Return cleanly to Glyph when process exits.
 
-### Task Detail View
+### 6.5 Config Resolution and Merge
 
-- Selecting a task opens its detail view
-- Right pane shows markdown-rendered description
-- Edit mode allows editing description via textarea
-- Toggle preview/edit mode
-
----
-
-## 6.3 Notes App
-
-Each workspace has one primary file:
-
-notes.md
-
-### Notes Features
-
-- Preview mode (rendered markdown using Glamour)
-- Edit mode (multiline textarea)
-- Scrollable viewport
-- Save within TUI
-- Cancel edit without saving
-
----
-
-## 6.4 Scratch App
-
-Each workspace has:
-
-scratch.md
-
-### Scratch Features
-
-- Fast open
-- Edit inside TUI
-- Optional preview toggle
-- Used for quick dumps/logs
-- Persist to disk
-
----
-
-## 7. Interaction Model
-
-Glyph operates with clear modes:
-
-- Browse Mode
-- Edit Mode
-- Preview Mode
-
-The current mode must be clearly visible in the status bar.
-
----
-
-### Global Keybindings (MVP)
-
-Global:
-
-- q → Quit
-- ? → Help
-- tab → Switch focus (if split view)
-- 1 → Tasks
-- 2 → Notes
-- 3 → Scratch
-- w → Switch workspace
-
-Tasks:
-
-- a → Add task
-- d → Toggle done
-- x → Delete task
-- e → Edit title
-- enter → Open detail view
-
-Notes / Scratch:
-
-- e → Edit
-- p → Toggle preview
-- ctrl+s → Save
-- esc → Cancel edit
-
----
-
-## 8. UI / UX Requirements
-
-- Dark theme default
-- Single accent color
-- Soft borders (Lip Gloss)
-- Clean spacing
-- No heavy ASCII art
-- Minimal but expressive help bar
-- Smooth transitions between modes
-
-The UI must feel:
-
-- Playful
-- Intentional
-- Fast
-- Modern
-
-### 8.1 Color Palette (Current Direction)
-
-- Primary accent: `#FF9F68` (Glyph brand/action color)
-- Primary soft: `#FFD9A0` (active highlights)
-- Secondary border: `#5C6475` (structure/separators)
-- Secondary muted text: `#8A90A6` (supporting text)
-- Secondary surface: `#252A35` (chips/panels on dark UI)
-
----
-
-## 9. Performance Requirements
-
-- Startup time < 150ms
-- No noticeable UI lag
-- No blocking operations on main UI loop
-- File operations async-safe where needed
-
----
-
-## 10. Architecture (High-Level)
-
-### Modules
-
-- workspace/
-- tasks/
-- notes/
-- scratch/
-- ui/
-- storage/
-
-State managed via Bubble Tea Model.
-
-Each app:
-
-- Owns internal state
-- Renders via View()
-- Handles Update() messages
-
----
-
-## 11. Success Criteria
-
-Glyph v0.1 is successful if:
-
-- It is used daily for at least 2 weeks
-- Workspaces prevent task/note mixing
-- In-TUI editing feels natural
-- No desire to immediately replace with external editor
-- No performance frustrations
-
----
-
-## 12. Future Expansion (Post-MVP)
-
-- Command launcher overlay
-- Plugin system
-- Git awareness
-- Multiple notes per workspace
-- Session logs
-- Task filtering/search
-- Command invocation engine
-
----
-
-# Definition of Done
-
-Glyph v0.1 is complete when:
-
-- Workspaces exist
-- Tasks work
-- Notes edit + preview works
-- Scratch works
-- Navigation feels clean
-- It is actually usable for real projects
+On startup, Glyph resolves configuration in this order:
+
+- Load global config from `~/.glyph/settings/config.json`.
+- Detect nearest ancestor project config at `.glyph/config.json` from the startup folder.
+- If found, auto-load project config with no confirmation prompt.
+
+Merge rules:
+
+- `commands`: merge by `id`, where project command definitions override global definitions.
+- `shortcuts`: load from global config only; project shortcuts are ignored in v1.
+
+### 6.6 Error Handling
+
+Must handle gracefully:
+
+- Invalid/missing global config file
+- Invalid project config file
+- Unknown shortcut target command ID
+- Command executable not found
+- Non-zero command exit codes
+
+Failures should surface a concise error in the hint/status area.
+
+## 7. Configuration and Storage
+
+### 7.1 Files
+
+- Global configuration: `~/.glyph/settings/config.json`
+- Optional project configuration: `<repo>/.glyph/config.json` (nearest ancestor from startup folder)
+
+### 7.2 config.json (draft)
+
+```json
+{
+  "version": 1,
+  "commands": [
+    {
+      "id": "user.lazygit",
+      "label": "LazyGit",
+      "run": "lazygit",
+      "enabled": true
+    },
+    {
+      "id": "user.test",
+      "label": "Run Tests",
+      "run": "npm test",
+      "enabled": true
+    }
+  ],
+  "shortcuts": {
+    "launcher.open": [
+      "ctrl+p",
+      "ctrl+k",
+      "alt+p"
+    ],
+    "user.lazygit": [
+      "ctrl+g"
+    ],
+    "user.test": [
+      "ctrl+t"
+    ]
+  }
+}
+```
+
+### 7.3 Merge Behavior
+
+- Both files use the same schema.
+- Global config is the base layer.
+- Project config can add/override `commands`.
+- Project `shortcuts` are ignored in v1.
+
+## 8. User Flows
+
+1. Launch from palette:
+   Open palette, search command, press `enter`, command runs, Glyph resumes on exit.
+2. Launch from shortcut:
+   Press mapped shortcut in main mode, command runs immediately, Glyph resumes on exit.
+3. Configure personal commands:
+   Edit `config.json` (`commands` section), restart/reload Glyph, new commands appear.
+4. Configure shared project commands:
+   Commit `.glyph/config.json` in a repo; when Glyph starts in that repo, project commands are auto-loaded and merged.
+5. Configure personal shortcuts:
+   Edit global `config.json` (`shortcuts` section), restart/reload Glyph, shortcuts apply.
+6. Failure case:
+   Command fails or cannot start, Glyph returns and shows a concise error.
+
+## 9. Performance and Reliability Requirements
+
+- Startup target: < 150ms on typical developer machines
+- No noticeable lag while typing/filtering in palette
+- No blocking UI behavior beyond intended process handoff during command execution
+- No crashes from malformed config files
+
+## 10. Acceptance Criteria
+
+1. Missing global `config.json` is created with a valid template including default launcher shortcuts.
+2. Invalid config never crashes Glyph.
+3. Mixed valid/invalid command entries load valid entries only.
+4. Disabled commands do not appear in palette and cannot run by shortcut.
+5. Palette filtering matches `label`, `id`, and shortcut.
+6. `enter` on a selected command executes its `run` string.
+7. Shortcut-triggered execution matches palette execution behavior.
+8. Commands always run in the current terminal session.
+9. Commands always run in Glyph's startup working directory.
+10. After command exit, Glyph resumes interactive TUI normally.
+11. Shortcut collisions are rejected with clear feedback.
+12. Reserved shortcuts cannot be overridden.
+13. If `.glyph/config.json` exists in the nearest ancestor, project commands are auto-loaded.
+14. Project command `id` collisions override global command definitions deterministically.
+15. Project shortcuts do not override global shortcuts in v1.
+
+## 11. Future Expansion (Post-v1)
+
+- Marketplace for installing CLI/TUI packages
+- Install/update/uninstall command packs from within palette
+- Verified publishers and package trust/signature model
+- Optional run targets (current terminal vs new terminal window)
+- Optional per-command working directory override
+
+## Definition of Done
+
+Glyph v1 is complete when:
+
+1. Users can define and launch custom commands from palette and shortcuts.
+2. Execution is reliable in current terminal + current folder.
+3. Config and execution failures are handled without crashes.
+4. The app is stable enough for daily command-launcher usage.

@@ -1,24 +1,58 @@
 package shell
 
 import (
-	"github.com/Noudea/glyph/internal/core"
+	"errors"
+	"fmt"
+	"os/exec"
+	"runtime"
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+type commandFinishedMsg struct {
+	CommandID string
+	Err       error
+}
 
 func (m *Model) executeCommand(commandID string) tea.Cmd {
 	switch commandID {
 	case commandLauncherOpen:
 		m.openLauncher()
 		return nil
-	case actionTabsNext:
-		m.cycleOpenApp(1)
-		return nil
-	case actionWorkspaceToggle, actionWorkspaceProject, actionWorkspaceCreate, actionWorkspaceGlobal:
-		return m.runWorkspaceAction(commandID)
 	default:
-		m.openAppByID(commandID)
-		return nil
+		command, ok := m.findCommandByID(commandID)
+		if !ok {
+			m.err = "command not found: " + commandID
+			return nil
+		}
+		run := strings.TrimSpace(command.Run)
+		if run == "" {
+			m.err = "command has no run value: " + commandID
+			return nil
+		}
+
+		process := shellExecCommand(run, m.startDir)
+		return tea.ExecProcess(process, func(err error) tea.Msg {
+			return commandFinishedMsg{CommandID: commandID, Err: err}
+		})
 	}
+}
+
+func (m *Model) handleCommandFinished(msg commandFinishedMsg) {
+	if msg.Err == nil {
+		m.err = ""
+		m.openLauncher()
+		return
+	}
+
+	command, ok := m.findCommandByID(msg.CommandID)
+	label := msg.CommandID
+	if ok {
+		label = command.Label
+	}
+	m.err = fmt.Sprintf("%s failed: %s", label, formatCommandExecError(msg.Err))
+	m.openLauncher()
 }
 
 func (m *Model) openLauncher() {
@@ -28,45 +62,40 @@ func (m *Model) openLauncher() {
 	m.clampLauncherCursor()
 }
 
-func (m *Model) runWorkspaceAction(actionID string) tea.Cmd {
-	resolve := func(kind core.WorkspaceKind) (core.Workspace, error) {
-		if kind == core.WorkspaceProject {
-			return m.resolver.ResolveProject(true)
-		}
-		return m.resolver.ResolveGlobal()
+func shellExecCommand(run string, cwd string) *exec.Cmd {
+	var command *exec.Cmd
+	if runtime.GOOS == "windows" {
+		command = exec.Command("cmd", "/C", wrapWindowsQuickPauseCommand(run))
+	} else {
+		command = exec.Command("sh", "-lc", wrapPosixQuickPauseCommand(run))
 	}
+	command.Dir = cwd
+	return command
+}
 
-	switch actionID {
-	case actionWorkspaceToggle:
-		if m.workspace.Kind == core.WorkspaceProject {
-			workspace, err := resolve(core.WorkspaceGlobal)
-			if err != nil {
-				m.err = err.Error()
-				return nil
-			}
-			return m.setWorkspace(workspace)
-		}
-		workspace, err := resolve(core.WorkspaceProject)
-		if err != nil {
-			m.err = err.Error()
-			return nil
-		}
-		return m.setWorkspace(workspace)
-	case actionWorkspaceProject, actionWorkspaceCreate:
-		workspace, err := resolve(core.WorkspaceProject)
-		if err != nil {
-			m.err = err.Error()
-			return nil
-		}
-		return m.setWorkspace(workspace)
-	case actionWorkspaceGlobal:
-		workspace, err := resolve(core.WorkspaceGlobal)
-		if err != nil {
-			m.err = err.Error()
-			return nil
-		}
-		return m.setWorkspace(workspace)
-	default:
-		return nil
+func wrapPosixQuickPauseCommand(run string) string {
+	return "__glyph_start=$(date +%s); " +
+		run +
+		"; __glyph_status=$?; __glyph_end=$(date +%s); " +
+		"if [ $((__glyph_end-__glyph_start)) -lt 2 ]; then " +
+		"printf '\\n[glyph] Press Enter to return...'; IFS= read -r _; " +
+		"fi; exit $__glyph_status"
+}
+
+func wrapWindowsQuickPauseCommand(run string) string {
+	return run + " & set __glyph_status=%errorlevel% & echo. & echo [glyph] Press Enter to return... & pause >nul & exit /b %__glyph_status%"
+}
+
+func formatCommandExecError(err error) string {
+	if err == nil {
+		return ""
 	}
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) {
+		code := exitErr.ExitCode()
+		if code >= 0 {
+			return fmt.Sprintf("exit code %d", code)
+		}
+	}
+	return err.Error()
 }

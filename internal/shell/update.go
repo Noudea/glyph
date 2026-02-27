@@ -1,7 +1,8 @@
 package shell
 
 import (
-	"github.com/Noudea/glyph/internal/registry"
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -13,8 +14,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case splashTickMsg:
 		return m.updateSplashTick()
-	case registry.ChangedMsg:
-		m.refreshRegistry()
+	case commandFinishedMsg:
+		m.handleCommandFinished(msg)
 		return m, nil
 	case tea.KeyMsg:
 		return m.handleKey(msg)
@@ -68,11 +69,6 @@ func (m *Model) updateMain(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, m.executeCommand(commandID)
 	}
 
-	if module, ok := m.activeModule(); ok {
-		updated, cmd := module.Update(m.context(), msg)
-		m.modules[updated.ID()] = updated
-		return m, cmd
-	}
 	return m, nil
 }
 
@@ -111,21 +107,41 @@ func (m *Model) updateLauncher(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.mode = ModeMain
 		}
 	default:
-		if commandID, ok := m.resolveMainCommandIDForKey(key); ok {
-			if commandID == commandLauncherOpen {
+		if isLauncherShortcutCandidate(key) {
+			if commandID, ok := m.resolveMainCommandIDForKey(key); ok {
+				if commandID == commandLauncherOpen {
+					m.launcherInput.Blur()
+					m.mode = ModeMain
+					return m, nil
+				}
+				actionCmd = m.executeCommand(commandID)
 				m.launcherInput.Blur()
-				m.mode = ModeMain
-				return m, nil
-			}
-			actionCmd = m.executeCommand(commandID)
-			m.launcherInput.Blur()
-			if m.mode == ModeLauncher {
-				m.mode = ModeMain
+				if m.mode == ModeLauncher {
+					m.mode = ModeMain
+				}
 			}
 		}
 	}
 
 	return m, tea.Batch(inputCmd, actionCmd)
+}
+
+func isLauncherShortcutCandidate(key string) bool {
+	if key == "" {
+		return false
+	}
+	if strings.Contains(key, "ctrl+") || strings.Contains(key, "alt+") || strings.Contains(key, "shift+") {
+		return true
+	}
+	if strings.HasPrefix(key, "f") && len(key) > 1 {
+		for _, r := range key[1:] {
+			if r < '0' || r > '9' {
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }
 
 func (m *Model) clampLauncherCursor() {

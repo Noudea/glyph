@@ -1,6 +1,8 @@
 package shell
 
 import (
+	"errors"
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -8,31 +10,16 @@ import (
 const commandLauncherOpen = "launcher.open"
 
 var defaultMainCommandShortcuts = map[string][]string{
-	commandLauncherOpen:   {"ctrl+p", "ctrl+k", "alt+p"},
-	actionTabsNext:        {"tab"},
-	actionWorkspaceToggle: {"ctrl+w"},
+	commandLauncherOpen: {"ctrl+p", "ctrl+k", "alt+p"},
 }
 
-func (m *Model) loadGlobalShortcuts() error {
-	global, err := m.resolver.ResolveGlobal()
-	if err != nil {
-		return err
-	}
-	path := shortcutsConfigPath(global.RootPath)
-	if err := ensureShortcutsConfig(path, defaultMainCommandShortcuts); err != nil {
-		return err
-	}
-	overrides, err := loadShortcutsConfig(path)
-	if err != nil {
-		return err
-	}
-	m.applyShortcuts(overrides)
-	return nil
+var reservedShortcuts = map[string]string{
+	"ctrl+c": "quit",
 }
 
 func (m *Model) resolveMainCommandIDForKey(key string) (string, bool) {
 	if m.shortcutCommands == nil {
-		m.applyShortcuts(nil)
+		_ = m.applyShortcuts(nil)
 	}
 	commandID, ok := m.shortcutCommands[normalizeShortcutKey(key)]
 	return commandID, ok
@@ -54,8 +41,9 @@ func (m Model) shortcutsHint(commandID string, fallback string) string {
 	return strings.Join(shortcuts, "/")
 }
 
-func (m *Model) applyShortcuts(overrides map[string][]string) {
+func (m *Model) applyShortcuts(overrides map[string][]string) error {
 	bindings := copyShortcutBindings(defaultMainCommandShortcuts)
+	shortcutErrors := make([]error, 0)
 	known := m.knownCommandIDs()
 	commandIDs := make([]string, 0, len(overrides))
 	for commandID := range overrides {
@@ -64,6 +52,7 @@ func (m *Model) applyShortcuts(overrides map[string][]string) {
 	sort.Strings(commandIDs)
 	for _, commandID := range commandIDs {
 		if _, ok := known[commandID]; !ok {
+			shortcutErrors = append(shortcutErrors, fmt.Errorf("unknown shortcut command id: %s", commandID))
 			continue
 		}
 		keys := normalizeShortcutKeys(overrides[commandID])
@@ -78,11 +67,20 @@ func (m *Model) applyShortcuts(overrides map[string][]string) {
 	sort.Strings(allIDs)
 	for _, commandID := range allIDs {
 		for _, key := range bindings[commandID] {
+			if reason, reserved := reservedShortcuts[key]; reserved {
+				shortcutErrors = append(shortcutErrors, fmt.Errorf("shortcut %s is reserved for %s", key, reason))
+				continue
+			}
+			if existingID, exists := reverse[key]; exists && existingID != commandID {
+				shortcutErrors = append(shortcutErrors, fmt.Errorf("shortcut %s conflicts between %s and %s", key, existingID, commandID))
+				continue
+			}
 			reverse[key] = commandID
 		}
 	}
 	m.commandShortcuts = bindings
 	m.shortcutCommands = reverse
+	return errors.Join(shortcutErrors...)
 }
 
 func copyShortcutBindings(input map[string][]string) map[string][]string {
@@ -123,12 +121,7 @@ func normalizeShortcutKey(key string) string {
 
 func (m Model) knownCommandIDs() map[string]struct{} {
 	ids := map[string]struct{}{
-		commandLauncherOpen:    {},
-		actionTabsNext:         {},
-		actionWorkspaceToggle:  {},
-		actionWorkspaceProject: {},
-		actionWorkspaceCreate:  {},
-		actionWorkspaceGlobal:  {},
+		commandLauncherOpen: {},
 	}
 	if m.state != nil {
 		for _, cmd := range m.state.Commands {

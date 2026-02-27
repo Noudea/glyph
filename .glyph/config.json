@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "commands": [
+    {
+      "id": "user.listfiles",
+      "label": "List files",
+      "run": "ls",
+      "enabled": true
+    },
+    {
+      "id": "user.lazygit",
+      "label": "lazygit",
+      "run": "lazygit",
+      "enabled": true
+    }
+  ],
+  "shortcuts": {}
+}

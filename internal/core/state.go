@@ -6,6 +6,7 @@ type CommandKind string
 const (
 	CommandApp    CommandKind = "app"
 	CommandAction CommandKind = "action"
+	CommandExec   CommandKind = "exec"
 )
 
 // Command describes a runnable command in the palette.
@@ -15,6 +16,10 @@ type Command struct {
 	Kind     CommandKind
 	Group    string
 	Shortcut string
+	Run      string
+	Source   string
+	Managed  bool
+	ToolID   string
 }
 
 // State holds shared app state across UI.

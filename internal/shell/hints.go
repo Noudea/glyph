@@ -9,25 +9,13 @@ func (m Model) hintText() string {
 	case ModeMain:
 		hints := []string{
 			m.workspaceHint(),
-			m.primaryShortcut(actionTabsNext, "tab") + " next tab",
-			m.primaryShortcut(actionWorkspaceToggle, "ctrl+w") + " toggle workspace",
 			m.shortcutsHint(commandLauncherOpen, "ctrl+p/ctrl+k/alt+p") + " command palette",
 		}
 		if m.err != "" {
 			hints = append([]string{"error: " + m.err}, hints...)
 		}
-		if appHint := m.appHint(); appHint != "" {
-			hints = append([]string{appHint}, hints...)
-		}
 		return strings.Join(hints, " · ")
 	default:
 		return ""
 	}
-}
-
-func (m Model) appHint() string {
-	if module, ok := m.activeModule(); ok {
-		return module.Hint()
-	}
-	return ""
 }

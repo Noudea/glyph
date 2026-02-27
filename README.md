@@ -1,6 +1,6 @@
 # glyph
 
-`glyph` is a terminal workspace app for quick tasks and markdown notes.
+`glyph` is a terminal command palette launcher for CLI/TUI workflows.
 
 ## Install
 
@@ -44,23 +44,51 @@ go run ./cmd/glyph
 ## Usage
 
 - Open command palette: `ctrl+p`, `ctrl+k`, `alt+p`
-- Next tab: `tab`
-- Toggle workspace: `ctrl+w`
 - Quit: `ctrl+c`
 
-## Workspaces
+Commands run in:
 
-- `project`: used when a `.glyph` folder exists in the current directory or an ancestor.
-- `global`: fallback to `~/.glyph`.
+- Current terminal session
+- Current folder where `glyph` started
 
-Data is stored under the active workspace root:
+## Configuration
 
-- Tasks: `<workspaceRoot>/tasks/tasks.json`
-- Scratchpad: `<workspaceRoot>/scratchpad/scratchpad.md`
+Global config file (auto-created if missing):
 
-Global shortcuts file:
+- `~/.glyph/settings/config.json`
 
-- `~/.glyph/settings/shortcuts.json` (created automatically if missing)
+Optional project config (nearest ancestor):
+
+- `<repo>/.glyph/config.json`
+
+Project config can add/override `commands` by `id`.  
+Project `shortcuts` are ignored in v1.
+
+### Config schema
+
+```json
+{
+  "version": 1,
+  "commands": [
+    {
+      "id": "user.lazygit",
+      "label": "LazyGit",
+      "run": "lazygit",
+      "enabled": true
+    },
+    {
+      "id": "user.ls",
+      "label": "List Files",
+      "run": "ls -la",
+      "enabled": true
+    }
+  ],
+  "shortcuts": {
+    "launcher.open": ["ctrl+p", "ctrl+k", "alt+p"],
+    "user.lazygit": ["ctrl+g"]
+  }
+}
+```
 
 ## Requirements
 
