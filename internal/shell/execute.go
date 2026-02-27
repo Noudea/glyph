@@ -74,16 +74,16 @@ func shellExecCommand(run string, cwd string) *exec.Cmd {
 }
 
 func wrapPosixQuickPauseCommand(run string) string {
-	return "__glyph_start=$(date +%s); " +
+	return "clear; __glyph_start=$(date +%s); " +
 		run +
 		"; __glyph_status=$?; __glyph_end=$(date +%s); " +
 		"if [ $((__glyph_end-__glyph_start)) -lt 2 ]; then " +
-		"printf '\\n[glyph] Press Enter to return...'; IFS= read -r _; " +
+		"printf '\\n[glyph] Press Enter to return...'; IFS= read -r _; clear; " +
 		"fi; exit $__glyph_status"
 }
 
 func wrapWindowsQuickPauseCommand(run string) string {
-	return run + " & set __glyph_status=%errorlevel% & echo. & echo [glyph] Press Enter to return... & pause >nul & exit /b %__glyph_status%"
+	return "cls & " + run + " & set __glyph_status=%errorlevel% & echo. & echo [glyph] Press Enter to return... & pause >nul & cls & exit /b %__glyph_status%"
 }
 
 func formatCommandExecError(err error) string {
