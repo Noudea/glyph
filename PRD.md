@@ -36,7 +36,6 @@ Glyph solves this with a keyboard-first command palette plus user-defined shortc
 
 ## 4. Non-Goals (v1)
 
-- Tasks, notes, scratchpad features
 - Marketplace / package installation
 - Launching in a new terminal window
 - Background jobs / daemonized execution
