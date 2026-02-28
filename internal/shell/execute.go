@@ -20,6 +20,8 @@ func (m *Model) executeCommand(commandID string) tea.Cmd {
 	case commandLauncherOpen:
 		m.openLauncher()
 		return nil
+	case commandMarketplaceOpen:
+		return m.openMarketplace()
 	default:
 		command, ok := m.findCommandByID(commandID)
 		if !ok {

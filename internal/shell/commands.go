@@ -8,17 +8,29 @@ import (
 )
 
 const (
-	commandSourceGlobal  = "global"
-	commandSourceProject = "project"
-	commandSourceManaged = "managed"
+	commandSourceGlobal    = "global"
+	commandSourceProject   = "project"
+	commandSourceManaged   = "managed"
+	commandSourceSpellbook = "spellbook"
 )
 
 func (m Model) launcherCommands() []core.Command {
+	out := make([]core.Command, 0, len(m.state.Commands)+1)
+
+	// Add synthetic marketplace command.
+	out = append(out, core.Command{
+		ID:      commandMarketplaceOpen,
+		Label:   "Spellbook Marketplace",
+		Kind:    core.CommandAction,
+		Group:   "system",
+		Source:  commandSourceManaged,
+		Managed: true,
+	})
+
 	if m.state == nil || len(m.state.Commands) == 0 {
-		return nil
+		return out
 	}
 
-	out := make([]core.Command, 0, len(m.state.Commands))
 	for _, command := range m.state.Commands {
 		item := command
 		item.Shortcut = m.primaryShortcut(item.ID, item.Shortcut)

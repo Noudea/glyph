@@ -1,0 +1,38 @@
+{
+  "name": "Docker",
+  "description": "Docker workflows: containers, logs, prune, rebuild, exec",
+  "author": "noudea",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "id": "docker.exec-shell",
+      "label": "Docker: Exec Shell",
+      "script": "exec-shell.sh",
+      "enabled": true
+    },
+    {
+      "id": "docker.logs",
+      "label": "Docker: Tail Logs",
+      "script": "logs.sh",
+      "enabled": true
+    },
+    {
+      "id": "docker.prune",
+      "label": "Docker: Prune System",
+      "script": "prune.sh",
+      "enabled": true
+    },
+    {
+      "id": "docker.ps",
+      "label": "Docker: List Containers",
+      "script": "ps.sh",
+      "enabled": true
+    },
+    {
+      "id": "docker.rebuild",
+      "label": "Docker: Rebuild & Restart",
+      "script": "rebuild.sh",
+      "enabled": true
+    }
+  ]
+}

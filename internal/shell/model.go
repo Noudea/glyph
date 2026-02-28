@@ -6,9 +6,28 @@ import (
 	"strings"
 
 	"github.com/Noudea/glyph/internal/core"
+	"github.com/Noudea/glyph/internal/marketplace"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+type marketplaceEntry struct {
+	ID               string
+	Remote           marketplace.Spellbook
+	InstalledGlobal  bool
+	InstalledProject bool
+	HasUpdateGlobal  bool
+	HasUpdateProject bool
+}
+
+type marketplaceState struct {
+	loading        bool
+	err            string
+	entries        []marketplaceEntry
+	cursor         int
+	installing     string // ID currently being installed (for spinner)
+	confirmInstall string // non-empty = waiting for g/p scope choice
+}
 
 type Mode int
 
@@ -16,6 +35,7 @@ const (
 	ModeSplash Mode = iota
 	ModeMain
 	ModeLauncher
+	ModeMarketplace
 )
 
 // Model drives the UI.
@@ -38,6 +58,8 @@ type Model struct {
 	projectConfigPath string
 
 	splashFrame int
+
+	marketplace marketplaceState
 
 	width  int
 	height int

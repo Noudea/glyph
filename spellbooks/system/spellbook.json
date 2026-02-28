@@ -1,0 +1,32 @@
+{
+  "name": "System",
+  "description": "System utilities: disk usage, DNS flush, ports, top processes",
+  "author": "noudea",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "id": "system.disk-usage",
+      "label": "System: Disk Usage",
+      "script": "disk-usage.sh",
+      "enabled": true
+    },
+    {
+      "id": "system.flush-dns",
+      "label": "System: Flush DNS",
+      "script": "flush-dns.sh",
+      "enabled": true
+    },
+    {
+      "id": "system.ports-in-use",
+      "label": "System: Ports in Use",
+      "script": "ports-in-use.sh",
+      "enabled": true
+    },
+    {
+      "id": "system.top-processes",
+      "label": "System: Top Processes",
+      "script": "top-processes.sh",
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "spellbooks": {
+    "docker": {
+      "author": "noudea",
+      "commands": [
+        {
+          "enabled": true,
+          "id": "docker.exec-shell",
+          "label": "Docker: Exec Shell",
+          "script": "exec-shell.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.logs",
+          "label": "Docker: Tail Logs",
+          "script": "logs.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.prune",
+          "label": "Docker: Prune System",
+          "script": "prune.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.ps",
+          "label": "Docker: List Containers",
+          "script": "ps.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.rebuild",
+          "label": "Docker: Rebuild & Restart",
+          "script": "rebuild.sh"
+        }
+      ],
+      "description": "Docker workflows: containers, logs, prune, rebuild, exec",
+      "name": "Docker",
+      "version": "1.0.0"
+    },
+    "git": {
+      "author": "noudea",
+      "commands": [
+        {
+          "enabled": true,
+          "id": "git.interactive-rebase",
+          "label": "Git: Interactive Rebase",
+          "script": "interactive-rebase.sh"
+        },
+        {
+          "enabled": true,
+          "id": "git.stash-manager",
+          "label": "Git: Stash Manager",
+          "script": "stash-manager.sh"
+        },
+        {
+          "enabled": true,
+          "id": "git.branch-cleanup",
+          "label": "Git: Branch Cleanup",
+          "script": "branch-cleanup.sh"
+        },
+        {
+          "enabled": true,
+          "id": "git.commit-amend",
+          "label": "Git: Commit Amend",
+          "script": "commit-amend.sh"
+        },
+        {
+          "enabled": true,
+          "id": "git.log-graph",
+          "label": "Git: Log Graph",
+          "script": "log-graph.sh"
+        }
+      ],
+      "description": "Git workflows: rebase, stash, cleanup, amend, log",
+      "name": "Git",
+      "version": "1.0.0"
+    },
+    "system": {
+      "author": "noudea",
+      "commands": [
+        {
+          "enabled": true,
+          "id": "system.disk-usage",
+          "label": "System: Disk Usage",
+          "script": "disk-usage.sh"
+        },
+        {
+          "enabled": true,
+          "id": "system.flush-dns",
+          "label": "System: Flush DNS",
+          "script": "flush-dns.sh"
+        },
+        {
+          "enabled": true,
+          "id": "system.ports-in-use",
+          "label": "System: Ports in Use",
+          "script": "ports-in-use.sh"
+        },
+        {
+          "enabled": true,
+          "id": "system.top-processes",
+          "label": "System: Top Processes",
+          "script": "top-processes.sh"
+        }
+      ],
+      "description": "System utilities: disk usage, DNS flush, ports, top processes",
+      "name": "System",
+      "version": "1.0.0"
+    }
+  }
+}

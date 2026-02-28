@@ -1,0 +1,38 @@
+{
+  "name": "Git",
+  "description": "Git workflows: rebase, stash, cleanup, amend, log",
+  "author": "noudea",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "id": "git.interactive-rebase",
+      "label": "Git: Interactive Rebase",
+      "script": "interactive-rebase.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.stash-manager",
+      "label": "Git: Stash Manager",
+      "script": "stash-manager.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.branch-cleanup",
+      "label": "Git: Branch Cleanup",
+      "script": "branch-cleanup.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.commit-amend",
+      "label": "Git: Commit Amend",
+      "script": "commit-amend.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.log-graph",
+      "label": "Git: Log Graph",
+      "script": "log-graph.sh",
+      "enabled": true
+    }
+  ]
+}

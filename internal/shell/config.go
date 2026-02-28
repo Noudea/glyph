@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Noudea/glyph/internal/core"
+	"github.com/Noudea/glyph/internal/marketplace"
 )
 
 type configFile struct {
@@ -20,7 +21,8 @@ type configFile struct {
 type commandConfig struct {
 	ID      string `json:"id"`
 	Label   string `json:"label"`
-	Run     string `json:"run"`
+	Run     string `json:"run,omitempty"`
+	Script  string `json:"script,omitempty"`
 	Enabled *bool  `json:"enabled,omitempty"`
 }
 
@@ -126,15 +128,15 @@ func decodeShortcutMap(input map[string]json.RawMessage) (map[string][]string, [
 	return out, errs
 }
 
-func mergeCommands(global []commandConfig, project []commandConfig) ([]core.Command, []error) {
+func mergeCommands(global []commandConfig, globalRoot string, project []commandConfig, projectRoot string) ([]core.Command, []error) {
 	commandsByID := make(map[string]core.Command)
 	order := make([]string, 0, len(global)+len(project))
 	orderSet := make(map[string]struct{})
 	var errs []error
 
-	apply := func(entries []commandConfig, source string) {
+	apply := func(entries []commandConfig, source string, configRoot string) {
 		for _, item := range entries {
-			command, ok, err := parseCommandConfig(item, source)
+			command, ok, err := parseCommandConfig(item, source, configRoot)
 			if err != nil {
 				errs = append(errs, err)
 			}
@@ -149,8 +151,8 @@ func mergeCommands(global []commandConfig, project []commandConfig) ([]core.Comm
 		}
 	}
 
-	apply(global, commandSourceGlobal)
-	apply(project, commandSourceProject)
+	apply(global, commandSourceGlobal, globalRoot)
+	apply(project, commandSourceProject, projectRoot)
 
 	out := make([]core.Command, 0, len(order))
 	for _, id := range order {
@@ -171,7 +173,7 @@ func mergeCommands(global []commandConfig, project []commandConfig) ([]core.Comm
 	return out, errs
 }
 
-func parseCommandConfig(item commandConfig, source string) (core.Command, bool, error) {
+func parseCommandConfig(item commandConfig, source string, configRoot string) (core.Command, bool, error) {
 	id := strings.TrimSpace(item.ID)
 	if id == "" {
 		return core.Command{}, false, errors.New("command id is required")
@@ -179,9 +181,17 @@ func parseCommandConfig(item commandConfig, source string) (core.Command, bool, 
 	if !commandEnabled(item.Enabled) {
 		return core.Command{}, false, nil
 	}
+
 	run := strings.TrimSpace(item.Run)
-	if run == "" {
-		return core.Command{}, false, errors.New("command run is required for " + id)
+	script := strings.TrimSpace(item.Script)
+
+	if run == "" && script == "" {
+		return core.Command{}, false, errors.New("command run or script is required for " + id)
+	}
+
+	// script is resolved to an absolute path relative to configRoot.
+	if script != "" {
+		run = filepath.Join(configRoot, script)
 	}
 
 	label := strings.TrimSpace(item.Label)
@@ -213,6 +223,51 @@ func normalizeShortcutMap(input map[string][]string) map[string][]string {
 		out[commandID] = normalizeShortcutKeys(keys)
 	}
 	return out
+}
+
+func loadSpellbookCommands(root string, source string, absolute bool) ([]core.Command, error) {
+	installed := marketplace.ListInstalled(root)
+	var commands []core.Command
+	for id, sb := range installed {
+		for _, cmd := range sb.Commands {
+			if cmd.Enabled != nil && !*cmd.Enabled {
+				continue
+			}
+
+			// Resolve the script/run to an executable path.
+			// Spellbooks should use "script" (file relative to spellbook dir),
+			// but we also support "run" for backwards compatibility.
+			scriptFile := cmd.Script
+			if scriptFile == "" {
+				scriptFile = cmd.Run
+			}
+
+			var run string
+			if scriptFile != "" {
+				if absolute {
+					run = filepath.Join(root, "spellbooks", id, scriptFile)
+				} else {
+					run = filepath.Join(".glyph", "spellbooks", id, scriptFile)
+				}
+			} else {
+				run = cmd.Run
+			}
+
+			label := strings.TrimSpace(cmd.Label)
+			if label == "" {
+				label = cmd.ID
+			}
+			commands = append(commands, core.Command{
+				ID:     cmd.ID,
+				Label:  label,
+				Kind:   core.CommandExec,
+				Group:  "spellbook",
+				Run:    run,
+				Source: source,
+			})
+		}
+	}
+	return commands, nil
 }
 
 func (m *Model) reloadConfig() error {
@@ -260,8 +315,28 @@ func (m *Model) reloadConfig() error {
 		m.projectConfigPath = ""
 	}
 
-	commands, commandProblems := mergeCommands(globalConfig.Commands, projectConfig.Commands)
+	projectRoot := ""
+	if m.projectConfigPath != "" {
+		projectRoot = filepath.Dir(m.projectConfigPath) // .glyph/ directory
+	}
+	commands, commandProblems := mergeCommands(globalConfig.Commands, globalRoot.RootPath, projectConfig.Commands, projectRoot)
 	problems = append(problems, commandProblems...)
+
+	// Load spellbook commands from installed spellbooks.
+	globalSpellbookCmds, err := loadSpellbookCommands(globalRoot.RootPath, commandSourceSpellbook, true)
+	if err != nil {
+		problems = append(problems, err)
+	}
+	commands = append(commands, globalSpellbookCmds...)
+
+	if projectRoot != "" {
+		projectSpellbookCmds, err := loadSpellbookCommands(projectRoot, commandSourceSpellbook, false)
+		if err != nil {
+			problems = append(problems, err)
+		}
+		commands = append(commands, projectSpellbookCmds...)
+	}
+
 	if m.state != nil {
 		m.state.Commands = commands
 	}

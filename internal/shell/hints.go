@@ -6,6 +6,8 @@ func (m Model) hintText() string {
 	switch m.mode {
 	case ModeLauncher:
 		return "type to filter · ↑/↓ move · enter run · esc/" + m.shortcutsHint(commandLauncherOpen, "ctrl+p/ctrl+k/alt+p") + " close"
+	case ModeMarketplace:
+		return "↑/↓ navigate · tab scope · esc back"
 	case ModeMain:
 		hints := []string{
 			m.workspaceHint(),

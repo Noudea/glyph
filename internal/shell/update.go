@@ -17,6 +17,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case commandFinishedMsg:
 		m.handleCommandFinished(msg)
 		return m, nil
+	case marketplaceListMsg, marketplaceInstallMsg, marketplaceUninstallMsg, marketplaceUpdateMsg:
+		return m.updateMarketplace(msg)
 	case tea.KeyMsg:
 		return m.handleKey(msg)
 	}
@@ -38,6 +40,8 @@ func (m *Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.updateMain(msg)
 	case ModeLauncher:
 		return m.updateLauncher(msg)
+	case ModeMarketplace:
+		return m.updateMarketplace(msg)
 	}
 
 	return m, nil
