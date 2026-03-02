@@ -136,6 +136,18 @@
           "id": "git.worktree",
           "label": "Git: Worktree Manager",
           "script": "worktree.sh"
+        },
+        {
+          "enabled": true,
+          "id": "git.interactive-rebase",
+          "label": "Git: Interactive Rebase",
+          "script": "interactive-rebase.sh"
+        },
+        {
+          "enabled": true,
+          "id": "git.commit-amend",
+          "label": "Git: Commit Amend",
+          "script": "commit-amend.sh"
         }
       ],
       "description": "Git workflows: status, log, commit, sync, stash, branches, tags, and more",
