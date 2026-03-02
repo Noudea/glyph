@@ -1,13 +1,31 @@
 {
   "name": "Git",
-  "description": "Git workflows: rebase, stash, cleanup, amend, log",
+  "description": "Git workflows: status, log, commit, sync, stash, branches, tags, and more",
   "author": "noudea",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "commands": [
     {
-      "id": "git.interactive-rebase",
-      "label": "Git: Interactive Rebase",
-      "script": "interactive-rebase.sh",
+      "id": "git.status",
+      "label": "Git: Status Overview",
+      "script": "status.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.log-graph",
+      "label": "Git: Log Graph",
+      "script": "log-graph.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.quick-commit",
+      "label": "Git: Quick Commit",
+      "script": "quick-commit.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.sync",
+      "label": "Git: Sync Branch",
+      "script": "sync.sh",
       "enabled": true
     },
     {
@@ -23,15 +41,63 @@
       "enabled": true
     },
     {
-      "id": "git.commit-amend",
-      "label": "Git: Commit Amend",
-      "script": "commit-amend.sh",
+      "id": "git.undo-commit",
+      "label": "Git: Undo Last Commit",
+      "script": "undo-commit.sh",
       "enabled": true
     },
     {
-      "id": "git.log-graph",
-      "label": "Git: Log Graph",
-      "script": "log-graph.sh",
+      "id": "git.diff-summary",
+      "label": "Git: Diff Summary",
+      "script": "diff-summary.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.create-branch",
+      "label": "Git: Create Branch",
+      "script": "create-branch.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.tag-release",
+      "label": "Git: Tag Release",
+      "script": "tag-release.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.cherry-pick",
+      "label": "Git: Cherry Pick",
+      "script": "cherry-pick.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.blame-line",
+      "label": "Git: Blame Line",
+      "script": "blame-line.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.contributors",
+      "label": "Git: Contributors",
+      "script": "contributors.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.find-commit",
+      "label": "Git: Find Commit",
+      "script": "find-commit.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.reset-file",
+      "label": "Git: Reset File",
+      "script": "reset-file.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.worktree",
+      "label": "Git: Worktree Manager",
+      "script": "worktree.sh",
       "enabled": true
     }
   ]
