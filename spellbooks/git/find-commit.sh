@@ -27,3 +27,5 @@ fi
 count=$(echo "$results" | wc -l | tr -d ' ')
 printf "\n${BOLD}${YELLOW} %s result(s) for '%s':${RESET}\n\n" "$count" "$query"
 echo "$results"
+printf "\n${DIM}Press Enter to return...${RESET}"
+read -r _

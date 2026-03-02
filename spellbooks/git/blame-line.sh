@@ -26,3 +26,5 @@ fi
 echo ""
 printf "${BOLD}${YELLOW} Blame for %s (lines %s):${RESET}\n\n" "$filepath" "$range"
 git blame -L "$range" --color-by-age --color-lines "$filepath"
+printf "\n${DIM}Press Enter to return...${RESET}"
+read -r _
