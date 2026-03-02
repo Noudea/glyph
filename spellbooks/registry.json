@@ -152,7 +152,7 @@
       ],
       "description": "Git workflows: status, log, commit, sync, stash, branches, tags, and more",
       "name": "Git",
-      "version": "2.0.0"
+      "version": "2.1.0"
     },
     "system": {
       "author": "noudea",
