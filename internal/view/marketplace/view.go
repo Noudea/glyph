@@ -108,6 +108,15 @@ func newStyles() styles {
 
 // Render draws the marketplace panel.
 func Render(state ViewState) string {
+	// Show modal instead of marketplace when confirming install scope.
+	if state.ConfirmInstall != "" {
+		modal := renderInstallModal(state, newStyles())
+		if state.Width > 0 && state.Height > 0 {
+			return lipgloss.Place(state.Width, state.Height, lipgloss.Center, lipgloss.Center, modal)
+		}
+		return modal
+	}
+
 	panel := renderPanel(state)
 	if state.Width > 0 && state.Height > 0 {
 		panel = lipgloss.Place(state.Width, state.Height, lipgloss.Center, lipgloss.Center, panel)
@@ -303,15 +312,6 @@ func renderRightPanel(state ViewState, width int, s styles) string {
 }
 
 func renderFooter(state ViewState, width int, s styles) string {
-	// If confirming install scope, show scope prompt.
-	if state.ConfirmInstall != "" {
-		return s.footerKey.Render("g") + s.footerDesc.Render(" global") +
-			s.footerDesc.Render(" · ") +
-			s.footerKey.Render("p") + s.footerDesc.Render(" project") +
-			s.footerDesc.Render(" · ") +
-			s.footerKey.Render("esc") + s.footerDesc.Render(" cancel")
-	}
-
 	var parts []string
 
 	// Contextual actions based on selected entry.
@@ -413,6 +413,37 @@ func entryWindow(entries []Entry, cursor, maxRows int) ([]Entry, int, int) {
 		}
 	}
 	return entries[start:end], start, end
+}
+
+func renderInstallModal(state ViewState, s styles) string {
+	// Find the spellbook name.
+	name := state.ConfirmInstall
+	for _, e := range state.Entries {
+		if e.ID == state.ConfirmInstall {
+			name = e.Remote.Name
+			break
+		}
+	}
+
+	title := s.accent.Render("✦ Install " + name)
+	hint := s.muted.Render("Install globally or in current project?")
+
+	globalIcon := lipgloss.NewStyle().Foreground(lipgloss.Color("#FF9F68")).Bold(true).Render("◉ ")
+	projectIcon := lipgloss.NewStyle().Foreground(lipgloss.Color("#C4B5FD")).Bold(true).Render("◎ ")
+
+	optG := s.footerKey.Render("g") + s.row.Render("  global")
+	optP := s.footerKey.Render("p") + s.row.Render("  project")
+	cancel := s.muted.Render("esc to cancel")
+
+	return strings.Join([]string{
+		title,
+		hint,
+		"",
+		"  " + globalIcon + optG,
+		"  " + projectIcon + optP,
+		"",
+		cancel,
+	}, "\n")
 }
 
 func joinColumns(left, right string, width int) string {
