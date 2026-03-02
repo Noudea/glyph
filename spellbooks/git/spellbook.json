@@ -99,6 +99,18 @@
       "label": "Git: Worktree Manager",
       "script": "worktree.sh",
       "enabled": true
+    },
+    {
+      "id": "git.interactive-rebase",
+      "label": "Git: Interactive Rebase",
+      "script": "interactive-rebase.sh",
+      "enabled": true
+    },
+    {
+      "id": "git.commit-amend",
+      "label": "Git: Commit Amend",
+      "script": "commit-amend.sh",
+      "enabled": true
     }
   ]
 }
