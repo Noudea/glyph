@@ -2,7 +2,7 @@
   "name": "Git",
   "description": "Git workflows: status, log, commit, sync, stash, branches, tags, and more",
   "author": "noudea",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "commands": [
     {
       "id": "git.status",
