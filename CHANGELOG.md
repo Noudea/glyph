@@ -2,6 +2,12 @@
 
 ## v1 (2026-03-04)
 
+### Other
+
+- revert: remove .sh special handling on Windows (`c6209a7`)
+
+## v1 (2026-03-04)
+
 ### Bug Fixes
 
 - run .sh scripts through WSL on Windows (`1eb6f66`)
