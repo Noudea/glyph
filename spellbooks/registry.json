@@ -78,7 +78,7 @@
       ],
       "description": "Docker workflows: containers, images, logs, compose, networks, and more",
       "name": "Docker",
-      "version": "2.1.0"
+      "version": "2.0.0"
     },
     "git": {
       "author": "noudea",
