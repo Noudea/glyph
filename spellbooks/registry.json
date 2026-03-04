@@ -5,6 +5,12 @@
       "commands": [
         {
           "enabled": true,
+          "id": "docker.ps",
+          "label": "Docker: Containers",
+          "script": "ps.sh"
+        },
+        {
+          "enabled": true,
           "id": "docker.exec-shell",
           "label": "Docker: Exec Shell",
           "script": "exec-shell.sh"
@@ -23,20 +29,56 @@
         },
         {
           "enabled": true,
-          "id": "docker.ps",
-          "label": "Docker: List Containers",
-          "script": "ps.sh"
+          "id": "docker.rebuild",
+          "label": "Docker: Rebuild & Up",
+          "script": "rebuild.sh"
         },
         {
           "enabled": true,
-          "id": "docker.rebuild",
-          "label": "Docker: Rebuild & Restart",
-          "script": "rebuild.sh"
+          "id": "docker.images",
+          "label": "Docker: Images",
+          "script": "images.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.stats",
+          "label": "Docker: Resource Usage",
+          "script": "stats.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.restart",
+          "label": "Docker: Restart Container",
+          "script": "restart.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.stop-all",
+          "label": "Docker: Stop All",
+          "script": "stop-all.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.compose-status",
+          "label": "Docker: Compose Status",
+          "script": "compose-status.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.inspect",
+          "label": "Docker: Inspect Container",
+          "script": "inspect.sh"
+        },
+        {
+          "enabled": true,
+          "id": "docker.networks",
+          "label": "Docker: Networks",
+          "script": "networks.sh"
         }
       ],
-      "description": "Docker workflows: containers, logs, prune, rebuild, exec",
+      "description": "Docker workflows: containers, images, logs, compose, networks, and more",
       "name": "Docker",
-      "version": "1.0.0"
+      "version": "2.0.0"
     },
     "git": {
       "author": "noudea",
