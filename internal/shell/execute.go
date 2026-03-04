@@ -67,12 +67,23 @@ func (m *Model) openLauncher() {
 func shellExecCommand(run string, cwd string) *exec.Cmd {
 	var command *exec.Cmd
 	if runtime.GOOS == "windows" {
+		run = windowsShellWrap(run)
 		command = exec.Command("cmd", "/C", wrapWindowsQuickPauseCommand(run))
 	} else {
 		command = exec.Command("sh", "-lc", wrapPosixQuickPauseCommand(run))
 	}
 	command.Dir = cwd
 	return command
+}
+
+// windowsShellWrap prefixes .sh scripts with "sh" so they run inline
+// instead of being opened via Windows file association (which spawns a
+// new terminal window).
+func windowsShellWrap(run string) string {
+	if strings.HasSuffix(strings.ToLower(run), ".sh") {
+		return "sh " + run
+	}
+	return run
 }
 
 func wrapPosixQuickPauseCommand(run string) string {
