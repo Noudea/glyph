@@ -2,6 +2,12 @@
 
 ## v1 (2026-03-04)
 
+### Bug Fixes
+
+- run .sh scripts through WSL on Windows (`1eb6f66`)
+
+## v1 (2026-03-04)
+
 ### Features
 
 - add changelog pipeline from conventional commits (`6fce895`)
