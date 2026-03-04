@@ -22,7 +22,7 @@ for name in $containers; do
 done
 
 echo ""
-printf "${CYAN}Container number: ${RESET}"
+printf "${CYAN}Container number to restart: ${RESET}"
 read -r num
 
 target=$(echo "$containers" | sed -n "${num}p")
@@ -32,9 +32,6 @@ if [ -z "$target" ]; then
     exit 1
 fi
 
-printf "${CYAN}Shell [bash/sh]${RESET} ${DIM}(default: sh):${RESET} "
-read -r shell
-shell="${shell:-sh}"
-
-printf "\n${DIM}Entering %s on %s...${RESET}\n\n" "$shell" "$target"
-exec docker exec -it "$target" "$shell"
+printf "\n${CYAN}Restarting %s...${RESET}\n" "$target"
+docker restart "$target"
+printf "\n${GREEN} %s restarted.${RESET}\n" "$target"
